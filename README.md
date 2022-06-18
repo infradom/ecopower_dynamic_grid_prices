@@ -4,6 +4,7 @@
 Work in progress ! This will become a HomeAssistant integration
 
 This integration will periodically pull the dynamic grid prices from the https://transparency.entsoe.eu API platform.
+I know similar integrations exist, but this one wont need a dependency on node-red.
 (https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html)
 In order to use this, you will need to create a login and request an API token so that the integration can access the day-ahead-prices.
 
