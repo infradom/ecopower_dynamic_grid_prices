@@ -3,9 +3,10 @@
     "step": {
       "user": {
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "entsoe_token": "[%key:common::config_flow::data::entsoe_token%]",
+          "entsoe_area": "[%key:common::config_flow::data::entsoe_area%]",
+          "password": "[%key:common::config_flow::data::password%]",
+          "dummy": "dummy"
         }
       }
     },

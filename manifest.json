@@ -1,9 +1,10 @@
 {
   "domain": "dynamic_grid_prices_solar",
   "name": "DynGridPricesSolar",
+  "version": "0.0.1",
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/dynamic_grid_prices_solar",
-  "requirements": [],
+  "documentation": "https:/github.com/infradom/dynamic_grid_prices_solar",
+  "requirements": ["xmltodict"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},

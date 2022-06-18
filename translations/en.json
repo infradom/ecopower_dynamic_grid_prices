@@ -6,13 +6,14 @@
         "error": {
             "cannot_connect": "Failed to connect",
             "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
+            "unknown": "Unexpected error",
+            "auth": "authentication error"
         },
         "step": {
             "user": {
                 "data": {
-                    "host": "Host",
-                    "password": "Password",
+                    "entsoe_token": "Entsoe token",
+                    "entsoe_area": "Entsoe area",
                     "username": "Username"
                 }
             }
