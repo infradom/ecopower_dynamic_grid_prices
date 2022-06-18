@@ -1,7 +1,7 @@
 # dynamic_grid_prices_solar
 
 
-Work in progress ! This will become a HomeAssistant integration
+Work in progress ! This will become a HomeAssistant integration. FOR THE TIME BEING, IT DOES NOT WORK AT ALL
 
 This integration will periodically pull the dynamic grid prices from the https://transparency.entsoe.eu API platform.
 I know similar integrations exist, but this one wont need a dependency on node-red.
