@@ -1,6 +1,5 @@
 # dynamic_grid_prices_solar
- 
-# dynamic_grid_prices_solar
+
 
 Work in progress ! This will become a HomeAssistant integration
 
