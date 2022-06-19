@@ -9,7 +9,7 @@
           "entsoe_factor_A": "Entsoe scaling factor consumption",
           "entsoe_factor_B": "Entsoe additional consumtion fee",
           "entsoe_factor_C": "Entsoe scaling factor production",
-          "entsoe_factor_D": "Entsoe additional production fee",
+          "entsoe_factor_D": "Entsoe additional production fee"
         }
       }
     },
