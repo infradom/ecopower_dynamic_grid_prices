@@ -37,5 +37,7 @@ CONF_NAME            = "name"
 
 
 SENSOR = "sensor"
-PLATFORMS: list[Platform] = [SENSOR]
+PLATFORMS = [SENSOR]
+ICON = "mdi:format-quote-close"
+
 

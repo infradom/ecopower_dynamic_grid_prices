@@ -38,7 +38,7 @@ class DynPriceEntity(CoordinatorEntity):
 
 
 class DynPriceSensor(DynPriceEntity, SensorEntity):
-    """integration_blueprint Sensor class."""
+    """Sensor class."""
 
     @property
     def name(self):

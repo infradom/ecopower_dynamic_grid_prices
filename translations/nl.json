@@ -2,7 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "parameters for your setup",
         "data": {
           "entsoe_token": "Entsoe authentication token",
           "entsoe_area": "Entsoe area",
