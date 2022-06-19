@@ -2,6 +2,7 @@
   "config": {
     "step": {
       "user": {
+        "title": "parameters for your setup",
         "data": {
           "entsoe_token": "Entsoe authentication token",
           "entsoe_area": "Entsoe area",
@@ -21,5 +22,14 @@
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
     }
-  }
+  },
+  "options": {
+        "step": {
+            "user": {
+                "data": {
+                    "sensor": "Sensor enabled"
+                }
+            }
+        }
+    }
 }
