@@ -88,7 +88,7 @@ class EntsoeApiClient:
         now = datetime.now(timezone.utc)
         start = (now + timedelta(days=0)).strftime("%Y%m%d0000") #"202206152200"
         end   = (now + timedelta(days=1) ).strftime("%Y%m%d0000") #"202206202200"
-        _LOGGER.error(f"no error: entsoe interval {start} {end}")
+        _LOGGER.info(f"no error: entsoe interval {start} {end}")
         url = ENTSOE_DAYAHEAD_URL.format(TOKEN = self._token, AREA = self._area, START = start, END = end)
         try:
             async with async_timeout.timeout(TIMEOUT):

@@ -63,7 +63,7 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
         nowday = now.day
         nextday = (now + timedelta(days=1)).day
         nowhour = now.hour
-        _LOGGER.error(f"no error =  nowhour {nowhour} nowday = {nowday}")
+        #_LOGGER.error(f"no error =  nowhour {nowhour} nowday = {nowday}")
         searchhour = self.entity_description.key.partition("_slot_")[2] # empty if current price
         if searchhour: searchhour = int(searchhour)
         if   "today"    in self.entity_description.key: searchday = nowday
@@ -73,7 +73,7 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
             searchhour = nowhour
         if self.coordinator.data: rec = self.coordinator.data.get((searchday, searchhour, 0,) , None)
         else: rec = None
-        _LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
+        #_LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
         if rec: return rec["price"]
         else: return None
 
@@ -87,7 +87,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     """Setup sensor platform."""
     entities = []
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    _LOGGER.error(f"no error - device entry content {dir(entry)} entry_id: {entry.entry_id} data: {entry.data} options: {entry.options} state: {entry.state} source: {entry.source}")
+    _LOGGER.info(f"no error - device entry content {dir(entry)} entry_id: {entry.entry_id} data: {entry.data} options: {entry.options} state: {entry.state} source: {entry.source}")
     # entry.data is a dict that the config flow attributes
     descr = DynPriceSensorDescription( 
             name=f"Entsoe Current Price",
@@ -110,7 +110,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         sensor =  DynPriceSensor(coordinator, device_info, descr)
         entities.append(sensor)
     # create other entities
-    _LOGGER.error(f"no error - coordinator data in setup entry: {coordinator.data}")   
+    _LOGGER.info(f"no error - coordinator data in setup entry: {coordinator.data}")   
     async_add_entities(entities)
 
 
