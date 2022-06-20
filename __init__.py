@@ -88,6 +88,7 @@ class EntsoeApiClient:
         now = datetime.now(timezone.utc)
         start = (now + timedelta(days=0)).strftime("%Y%m%d0000") #"202206152200"
         end   = (now + timedelta(days=1) ).strftime("%Y%m%d0000") #"202206202200"
+        _LOGGER.error(f"no error: entsoe interval {start} {end}")
         url = ENTSOE_DAYAHEAD_URL.format(TOKEN = self._token, AREA = self._area, START = start, END = end)
         try:
             async with async_timeout.timeout(TIMEOUT):
@@ -102,19 +103,21 @@ class EntsoeApiClient:
                 #_LOGGER.info(jsond)
                 series = xpars['TimeSeries']
                 if isinstance(series, Mapping): series = [series]
+                res = {}
                 for ts in series:
                     start = ts['Period']['timeInterval']['start']
                     startts = datetime.strptime(start,'%Y-%m-%dT%H:%MZ').replace(tzinfo=timezone.utc).timestamp()
                     end = ts['Period']['timeInterval']['end']
                     if ts['Period']['resolution'] == 'PT60M': seconds = 3600
                     else: seconds = None
-                    res = {}
                     for point in ts['Period']['Point']:
                         offset = seconds * (int(point['position'])-1)
                         timestamp = startts + offset
+                        zulutime  = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                        localtime = datetime.fromtimestamp(timestamp)
                         price = float(point['price.amount'])
-                        _LOGGER.info(f"{timestamp} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
-                        res[int(timestamp)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                        _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
+                        res[(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
                 _LOGGER.info(f"fetched from entsoe: {res}")
                 return res             
         except Exception as exception:

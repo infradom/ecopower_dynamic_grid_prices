@@ -8,6 +8,7 @@ from homeassistant.components.sensor import (
     STATE_CLASS_TOTAL_INCREASING,
 )
 from typing import Optional, Dict, Any
+from datetime import datetime, timezone, timedelta
 from homeassistant.const import (DEVICE_CLASS_MONETARY,)
 from .const import NAME, VERSION, ATTRIBUTION
 from .const import DEFAULT_NAME, DOMAIN, ICON, SENSOR
@@ -57,8 +58,24 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
     @property
     def native_value(self):
         """Return the native value of the sensor."""
-        _LOGGER.error(f"no error - coordinator data in sensor native value: {self.coordinator.data}")
-        return self.coordinator.data.get(self.entity_description.key)
+        #_LOGGER.error(f"no error - coordinator data in sensor native value: {self.coordinator.data}")
+        now = datetime.utcnow()
+        nowday = now.day
+        nextday = (now + timedelta(days=1)).day
+        nowhour = now.hour
+        _LOGGER.error(f"no error =  nowhour {nowhour} nowday = {nowday}")
+        searchhour = self.entity_description.key.partition("_slot_")[2] # empty if current price
+        if searchhour: searchhour = int(searchhour)
+        if   "today"    in self.entity_description.key: searchday = nowday
+        elif "tomorrow" in self.entity_description.key: searchday = nextday
+        else: 
+            searchday = nowday
+            searchhour = nowhour
+        if self.coordinator.data: rec = self.coordinator.data.get((searchday, searchhour, 0,) , None)
+        else: rec = None
+        _LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
+        if rec: return rec["price"]
+        else: return None
 
     #@property
     #def icon(self):
