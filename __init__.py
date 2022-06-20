@@ -13,8 +13,8 @@ import json
 import logging
 from datetime import datetime, timezone, timedelta
 from collections.abc import Mapping
-from .const import DOMAIN, ENTSOE_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL, ENTSOE_HEADERS, ECOPWR_HEADERS, STARTUP_MESSAGE, CONF_ENTSOE_AREA, CONF_ENTSOE_TOKEN
-from .const import PLATFORMS, SENSOR
+from .const import ENTSOE_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL, ENTSOE_HEADERS, ECOPWR_HEADERS, STARTUP_MESSAGE, CONF_ENTSOE_AREA, CONF_ENTSOE_TOKEN
+from .const import DOMAIN, PLATFORMS, SENSOR
 
 # TODO List the platforms that you want to support.
 
@@ -98,8 +98,8 @@ class EntsoeApiClient:
                 xml = await response.text()
                 xpars = xmltodict.parse(xml)
                 xpars = xpars['Publication_MarketDocument']
-                jsond = json.dumps(xpars, indent=2)
-                _LOGGER.info(jsond)
+                #jsond = json.dumps(xpars, indent=2)
+                #_LOGGER.info(jsond)
                 series = xpars['TimeSeries']
                 if isinstance(series, Mapping): series = [series]
                 for ts in series:
@@ -113,8 +113,9 @@ class EntsoeApiClient:
                         offset = seconds * (int(point['position'])-1)
                         timestamp = startts + offset
                         price = float(point['price.amount'])
-                        _LOGGER.info(f"{timestamp} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp)} price={price}" )
-                        res[int(timestamp)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp)}
+                        _LOGGER.info(f"{timestamp} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
+                        res[int(timestamp)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                _LOGGER.info(f"fetched from entsoe: {res}")
                 return res             
         except Exception as exception:
             _LOGGER.exception(f"cannot fetch api data: {exception}") 

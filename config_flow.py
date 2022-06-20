@@ -16,9 +16,10 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .const import DOMAIN, NAME, CONF_ENTSOE_TOKEN, CONF_ENTSOE_AREA, CONF_ENTSOE_FACTOR_A, CONF_ENTSOE_FACTOR_B, CONF_ENTSOE_FACTOR_C, CONF_ENTSOE_FACTOR_D, CONF_NAME
-from .__init__ import EntsoeApiClient
+from .const import DOMAIN, NAME, CONF_NAME
+from .const import CONF_ENTSOE_TOKEN, CONF_ENTSOE_AREA, CONF_ENTSOE_FACTOR_A, CONF_ENTSOE_FACTOR_B, CONF_ENTSOE_FACTOR_C, CONF_ENTSOE_FACTOR_D
 from .const import PLATFORMS
+from .__init__ import EntsoeApiClient
 
 _LOGGER = logging.getLogger(__name__)
 
