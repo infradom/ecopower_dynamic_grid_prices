@@ -17,4 +17,6 @@ In order to use this, you will need to create a entsoe platform login and reques
 
 
 
- 
+ # disclaimer:
+ Errors in this software can have a significant impact on your electricity bill.
+ The authors cannot be held liable for any financial or other damage caused by the use of this software. 
