@@ -1,6 +1,7 @@
 """Sensor platform for integration_blueprint."""
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.const import CURRENCY_EURO, ENERGY_KILO_WATT_HOUR, ENERGY_MEGA_WATT_HOUR
 from dataclasses import dataclass
 from homeassistant.components.sensor import (
     SensorEntityDescription,
@@ -15,6 +16,86 @@ from .const import DEFAULT_NAME, DOMAIN, ICON, SENSOR
 import logging
 
 _LOGGER = logging.getLogger(__name__)
+
+_PRICE_SENSOR_ATTRIBUTES_MAP = { # stolen from PVPC integration ;-)
+    "tariff": "tariff",
+    "period": "period",
+    "available_power": "available_power",
+    "next_period": "next_period",
+    "hours_to_next_period": "hours_to_next_period",
+    "next_better_price": "next_better_price",
+    "hours_to_better_price": "hours_to_better_price",
+    "num_better_prices_ahead": "num_better_prices_ahead",
+    "price_position": "price_position",
+    "price_ratio": "price_ratio",
+    "max_price": "max_price",
+    "max_price_at": "max_price_at",
+    "min_price": "min_price",
+    "min_price_at": "min_price_at",
+    "next_best_at": "next_best_at",
+    "price_00h": "price_00h",
+    "price_01h": "price_01h",
+    "price_02h": "price_02h",
+    "price_02h_d": "price_02h_d",  # only on DST day change with 25h
+    "price_03h": "price_03h",
+    "price_04h": "price_04h",
+    "price_05h": "price_05h",
+    "price_06h": "price_06h",
+    "price_07h": "price_07h",
+    "price_08h": "price_08h",
+    "price_09h": "price_09h",
+    "price_10h": "price_10h",
+    "price_11h": "price_11h",
+    "price_12h": "price_12h",
+    "price_13h": "price_13h",
+    "price_14h": "price_14h",
+    "price_15h": "price_15h",
+    "price_16h": "price_16h",
+    "price_17h": "price_17h",
+    "price_18h": "price_18h",
+    "price_19h": "price_19h",
+    "price_20h": "price_20h",
+    "price_21h": "price_21h",
+    "price_22h": "price_22h",
+    "price_23h": "price_23h",
+    # only seen in the evening
+    "next_better_price (next day)": "next_better_price (next day)",
+    "hours_to_better_price (next day)": "hours_to_better_price (next day)",
+    "num_better_prices_ahead (next day)": "num_better_prices_ahead (next day)",
+    "price_position (next day)": "price_position (next day)",
+    "price_ratio (next day)": "price_ratio (next day)",
+    "max_price (next day)": "max_price (next day)",
+    "max_price_at (next day)": "max_price_at (next day)",
+    "min_price (next day)": "min_price (next day)",
+    "min_price_at (next day)": "min_price_at (next day)",
+    "next_best_at (next day)": "next_best_at (next day)",
+    "price_next_day_00h": "price_next_day_00h",
+    "price_next_day_01h": "price_next_day_01h",
+    "price_next_day_02h": "price_next_day_02h",
+    "price_next_day_02h_d": "price_next_day_02h_d",
+    "price_next_day_03h": "price_next_day_03h",
+    "price_next_day_04h": "price_next_day_04h",
+    "price_next_day_05h": "price_next_day_05h",
+    "price_next_day_06h": "price_next_day_06h",
+    "price_next_day_07h": "price_next_day_07h",
+    "price_next_day_08h": "price_next_day_08h",
+    "price_next_day_09h": "price_next_day_09h",
+    "price_next_day_10h": "price_next_day_10h",
+    "price_next_day_11h": "price_next_day_11h",
+    "price_next_day_12h": "price_next_day_12h",
+    "price_next_day_13h": "price_next_day_13h",
+    "price_next_day_14h": "price_next_day_14h",
+    "price_next_day_15h": "price_next_day_15h",
+    "price_next_day_16h": "price_next_day_16h",
+    "price_next_day_17h": "price_next_day_17h",
+    "price_next_day_18h": "price_next_day_18h",
+    "price_next_day_19h": "price_next_day_19h",
+    "price_next_day_20h": "price_next_day_20h",
+    "price_next_day_21h": "price_next_day_21h",
+    "price_next_day_22h": "price_next_day_22h",
+    "price_next_day_23h": "price_next_day_23h",
+}
+
 
 
 class DynPriceEntity(CoordinatorEntity):
@@ -37,6 +118,7 @@ class DynPriceSensorDescription(SensorEntityDescription):
     extra: float = None    # scaling factor : result = scale * (value+extra)
     minus: float = None    # scaling factor : result = scale * (value-minus)
     static_value: float = None # fixed static value from config entry
+    with_attribs: bool = False # add time series as attributes
 
 
 class DynPriceSensor(DynPriceEntity, SensorEntity):
@@ -90,10 +172,25 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                 return res
             else: return None
 
-    #@property
-    #def icon(self):
-    #    """Return the icon of the sensor."""
-    #    return ICON
+    
+    @property
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+        if self.entity_description.with_attribs:
+            self._attrs = {}
+            localday = datetime.now().day
+            localtomorrow = (datetime.now() + timedelta(days=1)).day
+            for (day, hour, minute,), value in self.coordinator.data.items():
+                price = value["price"]
+                zulutime = value["zulutime"]
+                localtime = value["localtime"]
+                if   localtime.day == localday: patt = f"price_{localtime.hour:02}h"
+                elif localtime.day == localtomorrow: patt = f"price_next_day_{localtime.hour:02}h"
+                else: patt = None
+                if patt: self._attrs[patt] = price
+            return self._attrs
+        else: return None    
+
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -106,8 +203,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     descr = DynPriceSensorDescription( 
             name="Current Price Entsoe",
             key="current_price_entsoe",
-            native_unit_of_measurement="EUR",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
+            with_attribs = True,
     )
     device = DynPriceSensor(coordinator, device_info, descr)
     entities.append(device)
@@ -115,7 +213,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     descr = DynPriceSensorDescription( 
             name="Current Price Injection",
             key="current_price_injection",
-            native_unit_of_measurement="EUR",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             scale=entry.data["entsoe_factor_C"],
             minus=entry.data["entsoe_factor_D"],
@@ -126,7 +224,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     descr = DynPriceSensorDescription( 
             name="Current Price Consumption",
             key="current_price_consumption",
-            native_unit_of_measurement="EUR",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             scale=entry.data["entsoe_factor_A"],
             extra=entry.data["entsoe_factor_B"],
@@ -145,7 +243,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     descr = DynPriceSensorDescription( 
             name="Entsoe Factor B Consumption Extracost",
             key="entsoe_factor_b_consumption_extracost",
-            native_unit_of_measurement="EUR",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             static_value = entry.data["entsoe_factor_B"],
     )
@@ -163,7 +261,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     descr = DynPriceSensorDescription( 
             name="Entsoe Factor D Production Extrafee",
             key="entsoe_factor_d_production_extrafee",
-            native_unit_of_measurement="EUR",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             static_value = entry.data["entsoe_factor_D"],
     )
@@ -174,7 +272,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         descr = DynPriceSensorDescription( 
             name=f"Entsoe Price Today Slot {i:02}",
             key=f"entsoe_price_today_slot_{i:02}",
-            native_unit_of_measurement="EUR",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             )
         sensor =  DynPriceSensor(coordinator, device_info, descr)

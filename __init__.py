@@ -6,6 +6,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.exceptions import ConfigEntryNotReady
 import async_timeout
 import aiohttp, asyncio
 import xmltodict
@@ -86,6 +87,8 @@ class EntsoeApiClient:
         self._session = session
 
     async def async_get_data(self) -> dict:
+        #today = datetime.now()               # exceptionally in localtime
+        #tomorrow = today + timedelta(days=1) # exceptionally in localtime
         now = datetime.now(timezone.utc)
         start = (now + timedelta(days=0)).strftime("%Y%m%d0000") #"202206152200"
         end   = (now + timedelta(days=1) ).strftime("%Y%m%d0000") #"202206202200"
@@ -95,7 +98,7 @@ class EntsoeApiClient:
             async with async_timeout.timeout(TIMEOUT):
                 response = await self._session.get(url, headers=ENTSOE_HEADERS)
                 if response.status != 200:
-                    _LOGGER.error('invalid response code from entsoe: {response.status}')
+                    _LOGGER.error(f'invalid response code from entsoe: {response.status}')
                     return None
                 xml = await response.text()
                 xpars = xmltodict.parse(xml)
@@ -119,8 +122,11 @@ class EntsoeApiClient:
                         localtime = datetime.fromtimestamp(timestamp)
                         price = float(point['price.amount'])
                         _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
-                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
-                        #res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                        #if   localtime.day == today.day:    patt = f"price_{localtime.hour:02}h"
+                        #elif localtime.day == tomorrow.day: patt = f"price_next_day_{localtime.hour:02}h"
+                        #else patt = None
+                        #if patt: res['points'][patt] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from entsoe: {res}")
                 return res             
@@ -149,10 +155,11 @@ class EntsoeDataUpdateCoordinator(DataUpdateCoordinator):
         if not self.cache or ((now - self.lastfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.cache['lastday'] <= zulutime.tm_mday)):
             try:
                 res = await self.api.async_get_data()
-                self.lastfetch = now
-                self.cache = res
+                if res:
+                    self.lastfetch = now
+                    self.cache = res
             except Exception as exception:
                 raise UpdateFailed() from exception
-        return self.cache['points']
+        if self.cache: return self.cache['points']
 
 
