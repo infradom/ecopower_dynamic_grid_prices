@@ -13,8 +13,8 @@ The software will support both the enseoe API (generic European) as well as the 
 - API authentication token. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token.
 - area code: for Belgium this is 10YBE----------2 (for other areas, see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas.
 - grid operators may charge different prices than the ones published on entsoe. This integration allows to declare factors A, B, C, D for some customization:
-  - consume cost: Cost = A * published_price + B
-  - injection fee:  Fee = C * published_price - D
+  - consume cost: Cost = A * (published_price + B)
+  - injection fee:  Fee = C * (published_price - D)
 
 
 
