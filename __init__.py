@@ -12,13 +12,14 @@ import xmltodict
 import json
 import logging
 from datetime import datetime, timezone, timedelta
+import time
 from collections.abc import Mapping
 from .const import ENTSOE_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL, ENTSOE_HEADERS, ECOPWR_HEADERS, STARTUP_MESSAGE, CONF_ENTSOE_AREA, CONF_ENTSOE_TOKEN
 from .const import DOMAIN, PLATFORMS, SENSOR
 
 # TODO List the platforms that you want to support.
 
-SCAN_INTERVAL = timedelta(seconds=300)
+SCAN_INTERVAL = timedelta(seconds=900)
 TIMEOUT = 10
 
 _LOGGER = logging.getLogger(__name__)
@@ -103,7 +104,8 @@ class EntsoeApiClient:
                 #_LOGGER.info(jsond)
                 series = xpars['TimeSeries']
                 if isinstance(series, Mapping): series = [series]
-                res = {}
+                res = { 'lastday' : 0, 'points': {} }
+                #res = {}
                 for ts in series:
                     start = ts['Period']['timeInterval']['start']
                     startts = datetime.strptime(start,'%Y-%m-%dT%H:%MZ').replace(tzinfo=timezone.utc).timestamp()
@@ -117,7 +119,9 @@ class EntsoeApiClient:
                         localtime = datetime.fromtimestamp(timestamp)
                         price = float(point['price.amount'])
                         _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
-                        res[(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                        #res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
+                        if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from entsoe: {res}")
                 return res             
         except Exception as exception:
@@ -131,13 +135,24 @@ class EntsoeDataUpdateCoordinator(DataUpdateCoordinator):
         """Initialize."""
         self.api = client
         self.platforms = []
+        self.lastfetch = 0
+        self.cache = None
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
     async def _async_update_data(self):
         """Update data via library."""
-        try:
-            return await self.api.async_get_data()
-        except Exception as exception:
-            raise UpdateFailed() from exception
+        now = time.time()
+        zulutime = time.gmtime(now)
+        _LOGGER.info(f"checking if api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
+        # reduce number of cloud fetches
+        if not self.cache or ((now - self.lastfetch >= 3600) and (zulutime.tm_hour >= 13) and (self.cache['lastday'] <= zulutime.tm_day)):
+            try:
+                res = await self.api.async_get_data()
+                self.lastfetch = now
+                self.cache = res
+            except Exception as exception:
+                raise UpdateFailed() from exception
+        return self.cache['points']
+
 
