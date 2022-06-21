@@ -33,7 +33,10 @@ class DynPriceEntity(CoordinatorEntity):
 @dataclass
 class DynPriceSensorDescription(SensorEntityDescription):
     # add additional attributes if applicable
-    dummy: int = None
+    scale: float = None    # scaling factor 
+    extra: float = None    # scaling factor : result = scale * (value+extra)
+    minus: float = None    # scaling factor : result = scale * (value-minus)
+    static_value: float = None # fixed static value from config entry
 
 
 class DynPriceSensor(DynPriceEntity, SensorEntity):
@@ -44,6 +47,9 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
         self.entity_description: DynPriceSensorDescription = description
         self._attr_device_info = device_info
         self._platform_name = 'sensor'
+        """self._value = value # typically a static value from config entry
+        self._scale = scale # scaling factor 
+        self._extro = extra # extra cost"""
 
     @property
     def name(self):
@@ -58,24 +64,31 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
     @property
     def native_value(self):
         """Return the native value of the sensor."""
-        #_LOGGER.error(f"no error - coordinator data in sensor native value: {self.coordinator.data}")
-        now = datetime.utcnow()
-        nowday = now.day
-        nextday = (now + timedelta(days=1)).day
-        nowhour = now.hour
-        #_LOGGER.error(f"no error =  nowhour {nowhour} nowday = {nowday}")
-        searchhour = self.entity_description.key.partition("_slot_")[2] # empty if current price
-        if searchhour: searchhour = int(searchhour)
-        if   "today"    in self.entity_description.key: searchday = nowday
-        elif "tomorrow" in self.entity_description.key: searchday = nextday
-        else: 
-            searchday = nowday
-            searchhour = nowhour
-        if self.coordinator.data: rec = self.coordinator.data.get((searchday, searchhour, 0,) , None)
-        else: rec = None
-        #_LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
-        if rec: return rec["price"]
-        else: return None
+        if self.entity_description.static_value: return self.entity_description.static_value # static config variable
+        else:
+            #_LOGGER.error(f"no error - coordinator data in sensor native value: {self.coordinator.data}")
+            now = datetime.utcnow()
+            nowday = now.day
+            nextday = (now + timedelta(days=1)).day
+            nowhour = now.hour
+            #_LOGGER.error(f"no error =  nowhour {nowhour} nowday = {nowday}")
+            searchhour = self.entity_description.key.partition("_slot_")[2] # empty if current price
+            if searchhour: searchhour = int(searchhour)
+            if   "today"    in self.entity_description.key: searchday = nowday
+            elif "tomorrow" in self.entity_description.key: searchday = nextday
+            else: 
+                searchday = nowday
+                searchhour = nowhour
+            if self.coordinator.data: rec = self.coordinator.data.get((searchday, searchhour, 0,) , None)
+            else: rec = None
+            #_LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
+            if rec:
+                res = rec["price"]
+                if self.entity_description.extra: res = res + self.entity_description.extra
+                if self.entity_description.minus: res = res - self.entity_description.minus
+                if self.entity_description.scale: res = res * self.entity_description.scale
+                return res
+            else: return None
 
     #@property
     #def icon(self):
@@ -88,17 +101,74 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = []
     coordinator = hass.data[DOMAIN][entry.entry_id]
     _LOGGER.info(f"no error - device entry content {dir(entry)} entry_id: {entry.entry_id} data: {entry.data} options: {entry.options} state: {entry.state} source: {entry.source}")
+    device_info = { "identifiers": {(DOMAIN,)},   "name" : NAME, }
     # entry.data is a dict that the config flow attributes
     descr = DynPriceSensorDescription( 
-            name=f"Entsoe Current Price",
-            key=f"entsoe_current_price",
+            name="Current Price Entsoe",
+            key="current_price_entsoe",
             native_unit_of_measurement="EUR",
             device_class = DEVICE_CLASS_MONETARY,
     )
-    device_info = { "identifiers": {(DOMAIN,)},   "name" : NAME, }
     device = DynPriceSensor(coordinator, device_info, descr)
-
     entities.append(device)
+
+    descr = DynPriceSensorDescription( 
+            name="Current Price Injection",
+            key="current_price_injection",
+            native_unit_of_measurement="EUR",
+            device_class = DEVICE_CLASS_MONETARY,
+            scale=entry.data["entsoe_factor_C"],
+            minus=entry.data["entsoe_factor_D"],
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
+
+    descr = DynPriceSensorDescription( 
+            name="Current Price Consumption",
+            key="current_price_consumption",
+            native_unit_of_measurement="EUR",
+            device_class = DEVICE_CLASS_MONETARY,
+            scale=entry.data["entsoe_factor_A"],
+            extra=entry.data["entsoe_factor_B"],
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
+
+    descr = DynPriceSensorDescription( 
+            name="Entsoe Factor A Consumption Scale",
+            key="entsoe_factor_a_consumption_scale",
+            static_value = entry.data['entsoe_factor_A'],
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
+
+    descr = DynPriceSensorDescription( 
+            name="Entsoe Factor B Consumption Extracost",
+            key="entsoe_factor_b_consumption_extracost",
+            native_unit_of_measurement="EUR",
+            device_class = DEVICE_CLASS_MONETARY,
+            static_value = entry.data["entsoe_factor_B"],
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
+
+    descr = DynPriceSensorDescription( 
+            name="Entsoe Factor C Production Scale",
+            key="entsoe_factor_c_production_scale",
+            static_value = entry.data["entsoe_factor_C"],
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
+
+    descr = DynPriceSensorDescription( 
+            name="Entsoe Factor D Production Extrafee",
+            key="entsoe_factor_d_production_extrafee",
+            native_unit_of_measurement="EUR",
+            device_class = DEVICE_CLASS_MONETARY,
+            static_value = entry.data["entsoe_factor_D"],
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
 
     for i in range(0,24):
         descr = DynPriceSensorDescription( 
@@ -109,7 +179,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             )
         sensor =  DynPriceSensor(coordinator, device_info, descr)
         entities.append(sensor)
-    # create other entities
+
     _LOGGER.info(f"no error - coordinator data in setup entry: {coordinator.data}")   
     async_add_entities(entities)
 

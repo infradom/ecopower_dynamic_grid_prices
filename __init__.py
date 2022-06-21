@@ -146,7 +146,7 @@ class EntsoeDataUpdateCoordinator(DataUpdateCoordinator):
         zulutime = time.gmtime(now)
         _LOGGER.info(f"checking if api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
         # reduce number of cloud fetches
-        if not self.cache or ((now - self.lastfetch >= 3600) and (zulutime.tm_hour >= 13) and (self.cache['lastday'] <= zulutime.tm_day)):
+        if not self.cache or ((now - self.lastfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.cache['lastday'] <= zulutime.tm_mday)):
             try:
                 res = await self.api.async_get_data()
                 self.lastfetch = now

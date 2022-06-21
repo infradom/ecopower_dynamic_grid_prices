@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 import voluptuous as vol
+import homeassistant.helpers.config_validation as cv
 import json
 import time
 import xmltodict
@@ -60,10 +61,10 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_NAME]            = NAME
         user_input[CONF_ENTSOE_TOKEN]    = ""
         user_input[CONF_ENTSOE_AREA]     = '10YBE----------2'
-        user_input[CONF_ENTSOE_FACTOR_A] = 0.001
-        user_input[CONF_ENTSOE_FACTOR_B] = 0.0023
-        user_input[CONF_ENTSOE_FACTOR_C] = 0.001
-        user_input[CONF_ENTSOE_FACTOR_D] = 0.0023
+        user_input[CONF_ENTSOE_FACTOR_A] = 0.001 # scale to kWh
+        user_input[CONF_ENTSOE_FACTOR_B] = 142.0  # per MWh
+        user_input[CONF_ENTSOE_FACTOR_C] = 0.001 # scale to kWh
+        user_input[CONF_ENTSOE_FACTOR_D] = 23.0   # per MWh
 
         return await self._show_config_form(user_input)
 
@@ -77,13 +78,13 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
-                {   vol.Required(CONF_NAME,            default = user_input[CONF_NAME]): str,
-                    vol.Required(CONF_ENTSOE_TOKEN,    default = user_input[CONF_ENTSOE_TOKEN]): str,
-                    vol.Required(CONF_ENTSOE_AREA,     default = user_input[CONF_ENTSOE_AREA]): str,
-                    vol.Required(CONF_ENTSOE_FACTOR_A, default = user_input[CONF_ENTSOE_FACTOR_A]): float,
-                    vol.Required(CONF_ENTSOE_FACTOR_B, default = user_input[CONF_ENTSOE_FACTOR_B]): float,                    
-                    vol.Required(CONF_ENTSOE_FACTOR_C, default = user_input[CONF_ENTSOE_FACTOR_C]): float,
-                    vol.Required(CONF_ENTSOE_FACTOR_D, default = user_input[CONF_ENTSOE_FACTOR_D]): float,
+                {   vol.Required(CONF_NAME,            default = user_input[CONF_NAME]): cv.string,
+                    vol.Required(CONF_ENTSOE_TOKEN,    default = user_input[CONF_ENTSOE_TOKEN]): cv.string,
+                    vol.Required(CONF_ENTSOE_AREA,     default = user_input[CONF_ENTSOE_AREA]): cv.string,
+                    vol.Required(CONF_ENTSOE_FACTOR_A, default = user_input[CONF_ENTSOE_FACTOR_A]): cv.positive_float,
+                    vol.Required(CONF_ENTSOE_FACTOR_B, default = user_input[CONF_ENTSOE_FACTOR_B]): cv.positive_float,                    
+                    vol.Required(CONF_ENTSOE_FACTOR_C, default = user_input[CONF_ENTSOE_FACTOR_C]): cv.positive_float,
+                    vol.Required(CONF_ENTSOE_FACTOR_D, default = user_input[CONF_ENTSOE_FACTOR_D]): cv.positive_float,
                 }
             ),
             errors=self._errors,
