@@ -7,6 +7,7 @@ This integration will periodically pull the dynamic grid prices from the https:/
 I know similar integrations exist, but this one wont need a dependency on node-red.
 In order to use this, you will need to create a entsoe platform login and request an API token so that the integration can access the day-ahead-prices.
 
+The software will support both the enseoe API (generic European) as well as the Ecopower trial API (Belgium only).
 
 # configuration parameters:
 - API authentication token. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token.
