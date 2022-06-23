@@ -16,7 +16,7 @@ This API provides the actual day-ahead prices that Ecopower will charge for a dy
 Current implementation assumes you have a single tarif, no day/night meter.
 
 # Configuration parameters:
-- API authentication token for Entsoe. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token. If you only want to use the Ecopower price, enter None in this field (not tested)
+- API authentication token for Entsoe. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token. If you only want to use the Ecopower price, leave this field empty. You must either provide an Entsoe token or an API token or both.
 - area code: for Belgium this is 10YBE----------2 (for other areas, see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas.
 - grid operators may charge different prices than the ones published on entsoe. This integration allows to declare factors A, B, C, D for some customization:
   - consume cost: Cost = A * (published_price + B)
