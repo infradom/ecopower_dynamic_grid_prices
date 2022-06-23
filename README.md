@@ -26,7 +26,7 @@ Note that depending on the taxation, these simple scaling formulas may not corre
 - (Optional) Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token.
 
 
-# entities created:
+# Entities created:
 This integration will create several entities for the different Entsoe and Ecopower injection and consumption prices.
 The entities contain an attribute list with the detailed day-ahead prices (per hour or per 15 minutes).
 Additional entities will be created in future versions to make your automations easier.
