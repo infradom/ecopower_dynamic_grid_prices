@@ -10,11 +10,14 @@ In order to use this, you will need to create a entsoe platform login and reques
 The software will support both the enseoe API (generic European) as well as the Ecopower trial API (Belgium only).
 
 # configuration parameters:
-- API authentication token. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token.
+- API authentication token for Entsoe. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token. If you only want to use the Ecopower price, enter None in this field (not tested)
 - area code: for Belgium this is 10YBE----------2 (for other areas, see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas.
 - grid operators may charge different prices than the ones published on entsoe. This integration allows to declare factors A, B, C, D for some customization:
   - consume cost: Cost = A * (published_price + B)
   - injection fee:  Fee = C * (published_price - D)
+Note that depending on the taxation, these simple scaling formulas may not correctly provide the real price in your country. They just allow us to have rough feeling of the consumption and injection price.
+
+- (Optional) Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token.
 
 
 
