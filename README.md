@@ -26,7 +26,15 @@ Note that depending on the taxation, these simple scaling formulas may not corre
 - (Optional) Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token.
 
 
+# entities created:
+This integration will create several entities for the different Entsoe and Ecopower injection and consumption prices.
+The entities contain an attribute list with the detailed day-ahead prices (per hour or per 15 minutes).
+Additional entities will be created in future versions to make your automations easier.
 
- # disclaimer:
+# Dashboard card:
+If possible, we will try to make this integration compatible with the nice PVPC hourly pricing card (designed for the Spanish net). See https://github.com/danimart1991/pvpc-hourly-pricing-card.  Thanks for this nice work @danimart1991
+
+
+# Disclaimer:
  Errors in this software can have a significant impact on your electricity bill.
  The authors cannot be held liable for any financial or other damage caused by the use of this software. 
