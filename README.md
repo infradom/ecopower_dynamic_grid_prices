@@ -31,7 +31,7 @@ This integration will create several entities for the different Entsoe and Ecopo
 The entities contain an attribute list with the detailed day-ahead prices (per hour or per 15 minutes).
 Additional entities will be created in future versions to make your automations easier.
 
-# Dashboard card:
+# Hourly Pricing Dashboard Card:
 If possible, we will try to make this integration compatible with the nice PVPC hourly pricing card (designed for the Spanish net). See https://github.com/danimart1991/pvpc-hourly-pricing-card.  Thanks for this nice work @danimart1991
 
 
