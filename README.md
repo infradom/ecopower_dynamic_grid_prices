@@ -1,15 +1,21 @@
 # dynamic_grid_prices_solar
 
 
-Work in progress ! This will become a HomeAssistant integration. FOR THE TIME BEING, IT DOES NOT WORK AT ALL
+Work in progress ! This will become a HomeAssistant integration. 
+FOR THE TIME BEING, IT IS VERY INCOMPLETE AND UNTESTED
 
-This integration will periodically pull the dynamic grid prices from the https://transparency.entsoe.eu API platform.
+This integration will periodically pull the dynamic grid prices from the https://transparency.entsoe.eu API platform (and/or the Belgian Ecopower trial API)
 I know similar integrations exist, but this one wont need a dependency on node-red.
+
+## Entsoe data source:
 In order to use this, you will need to create a entsoe platform login and request an API token so that the integration can access the day-ahead-prices.
+The Entsoe data source is generic and does not know your power providers markup costs. Extra cost and scaling factors can be applied for both consumption and injection.
 
-The software will support both the enseoe API (generic European) as well as the Ecopower trial API (Belgium only).
+## Ecopower trial data source (Ecopower customers only)
+This API provides the actual day-ahead prices that Ecopower will charge for a dynamic contract.
+Current implementation assumes you have a single tarif, no day/night meter.
 
-# configuration parameters:
+# Configuration parameters:
 - API authentication token for Entsoe. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token. If you only want to use the Ecopower price, enter None in this field (not tested)
 - area code: for Belgium this is 10YBE----------2 (for other areas, see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas.
 - grid operators may charge different prices than the ones published on entsoe. This integration allows to declare factors A, B, C, D for some customization:
