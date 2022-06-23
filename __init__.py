@@ -44,7 +44,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entsoe_token = entry.data.get(CONF_ENTSOE_TOKEN)
     ecopwr_token = entry.data.get(CONF_ECOPWR_TOKEN)
     area = entry.data.get(CONF_ENTSOE_AREA)
-    if entsoe_token != "None": # deliberately string None since paramter is required
+    if entsoe_token: # deliberately string None since paramter is required
         entsoe_session = async_get_clientsession(hass)
         entsoe_client = EntsoeApiClient(entsoe_session, entsoe_token, area)
     if ecopwr_token:
@@ -142,11 +142,11 @@ class EntsoeApiClient:
 
 
 class EcopowerApiClient:
-    def __init__(self, session: aiohttp.ClientSession, token: str) -> None:
+    def __init__(self, session: aiohttp.ClientSession, token: str ) -> None:
         self._token = token
         self._session = session
 
-    async def async_get_data(self, url: str) -> dict:
+    async def async_get_data(self, url: str = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_CONSUMPTION) ) -> dict:
         now = datetime.now(timezone.utc)
         try:
             async with async_timeout.timeout(TIMEOUT):

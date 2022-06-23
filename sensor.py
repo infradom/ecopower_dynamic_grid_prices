@@ -13,11 +13,12 @@ from datetime import datetime, timezone, timedelta
 from homeassistant.const import (DEVICE_CLASS_MONETARY,)
 from .const import NAME, VERSION, ATTRIBUTION
 from .const import DEFAULT_NAME, DOMAIN, ICON, SENSOR
+from .const import CONF_ENTSOE_TOKEN, CONF_ECOPWR_TOKEN
 import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-_PRICE_SENSOR_ATTRIBUTES_MAP = { # stolen from PVPC integration ;-)
+_PRICE_SENSOR_ATTRIBUTES_MAP = { # borrowed/stolen from PVPC integration ;-)
     "tariff": "tariff",
     "period": "period",
     "available_power": "available_power",
@@ -156,18 +157,18 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
             nextday = (now + timedelta(days=1)).day
             nowhour = now.hour
             #_LOGGER.error(f"no error =  nowhour {nowhour} nowday = {nowday}")
-            searchhour = self.entity_description.key.partition("_slot_")[2] # empty if current price
-            if searchhour: searchhour = int(searchhour)
-            if   "today"    in self.entity_description.key: searchday = nowday
-            elif "tomorrow" in self.entity_description.key: searchday = nextday
-            else: 
-                searchday = nowday
-                searchhour = nowhour
+            #searchhour = self.entity_description.key.partition("_slot_")[2] # empty if current price
+            #if searchhour: searchhour = int(searchhour)
+            #if   "today"    in self.entity_description.key: searchday = nowday
+            #elif "tomorrow" in self.entity_description.key: searchday = nextday
+            #else: 
+            #   searchday = nowday
+            #   searchhour = nowhour
 
             #_LOGGER.info(f"native value: coordinator: {self.coordinator} data: {self.coordinator.data} source: {self.entity_description.source}")
             rec = None
             if self.coordinator.data: 
-                try:  rec = self.coordinator.data[self.entity_description.source].get((searchday, searchhour, 0,) , None)
+                try:  rec = self.coordinator.data[self.entity_description.source].get((nowday, nowhour, 0,) , None)
                 except:
                     if self.coordinator.data[self.entity_description.source] != None: _LOGGER.error(f"cannot find {(searchday, searchhour), } data for {self.entity_description.source} : {self.coordinator.data}")
             #_LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
@@ -208,99 +209,101 @@ async def async_setup_entry(hass, entry, async_add_entities):
     _LOGGER.info(f"no error - device entry content {dir(entry)} entry_id: {entry.entry_id} data: {entry.data} options: {entry.options} state: {entry.state} source: {entry.source}")
     device_info = { "identifiers": {(DOMAIN,)},   "name" : NAME, }
     # entry.data is a dict that the config flow attributes
-    descr = DynPriceSensorDescription( 
-            name="Current Price Entsoe",
-            key="current_price_entsoe",
+    if entry.data[CONF_ENTSOE_TOKEN]:
+        descr = DynPriceSensorDescription( 
+            name="Entsoe Price",
+            key="entsoe_price",
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             with_attribs = True,
             source       = "entsoe",
-    )
-    device = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(device)
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
 
-    descr = DynPriceSensorDescription( 
-            name="Current Consumption Price Ecopower",
-            key="current_consumpton_price_ecopower",
-            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
-            device_class = DEVICE_CLASS_MONETARY,
-            with_attribs = True,
-            scale        = 0.001,
-            source       = "ecopower_consumption",
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
-
-    descr = DynPriceSensorDescription( 
-            name="Current Injection Price Ecopower",
-            key="current_injection_price_ecopower",
-            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
-            device_class = DEVICE_CLASS_MONETARY,
-            with_attribs = True,
-            scale        = 0.001,
-            source       = "ecopower_injection",
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
-
-    descr = DynPriceSensorDescription( 
-            name="Current Price Injection",
-            key="current_price_injection",
-            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
-            device_class = DEVICE_CLASS_MONETARY,
-            scale=entry.data["entsoe_factor_C"],
-            minus=entry.data["entsoe_factor_D"],
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
-
-    descr = DynPriceSensorDescription( 
-            name="Current Price Consumption",
-            key="current_price_consumption",
+        descr = DynPriceSensorDescription( 
+            name="Computed Price Consumption",
+            key="computed price_consumption",
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             scale=entry.data["entsoe_factor_A"],
             extra=entry.data["entsoe_factor_B"],
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
 
-    descr = DynPriceSensorDescription( 
+        descr = DynPriceSensorDescription( 
+            name="Computed Price Injection",
+            key="computed_price_injection",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
+            device_class = DEVICE_CLASS_MONETARY,
+            scale=entry.data["entsoe_factor_C"],
+            minus=entry.data["entsoe_factor_D"],
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
+
+        descr = DynPriceSensorDescription( 
             name="Entsoe Factor A Consumption Scale",
             key="entsoe_factor_a_consumption_scale",
             static_value = entry.data['entsoe_factor_A'],
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
 
-    descr = DynPriceSensorDescription( 
+        descr = DynPriceSensorDescription( 
             name="Entsoe Factor B Consumption Extracost",
             key="entsoe_factor_b_consumption_extracost",
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             static_value = entry.data["entsoe_factor_B"],
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
 
-    descr = DynPriceSensorDescription( 
+        descr = DynPriceSensorDescription( 
             name="Entsoe Factor C Production Scale",
             key="entsoe_factor_c_production_scale",
             static_value = entry.data["entsoe_factor_C"],
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
 
-    descr = DynPriceSensorDescription( 
+        descr = DynPriceSensorDescription( 
             name="Entsoe Factor D Production Extrafee",
             key="entsoe_factor_d_production_extrafee",
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             static_value = entry.data["entsoe_factor_D"],
-    )
-    sensor = DynPriceSensor(coordinator, device_info, descr)
-    entities.append(sensor)
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
 
+    if entry.data[CONF_ECOPWR_TOKEN]:
+        descr = DynPriceSensorDescription( 
+            name="Ecopower Consumption Price",
+            key="ecopower_consumption_price",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
+            device_class = DEVICE_CLASS_MONETARY,
+            with_attribs = True,
+            scale        = 0.001,
+            source       = "ecopower_consumption",
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
+
+        descr = DynPriceSensorDescription( 
+            name="Ecopower Injection Price",
+            key="ecopower_injection_price",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
+            device_class = DEVICE_CLASS_MONETARY,
+            with_attribs = True,
+            scale        = 0.001,
+            source       = "ecopower_injection",
+        )
+        sensor = DynPriceSensor(coordinator, device_info, descr)
+        entities.append(sensor)
+    """
     for i in range(0,24):
         descr = DynPriceSensorDescription( 
             name=f"Entsoe Price Today Slot {i:02}",
@@ -310,8 +313,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
             )
         sensor =  DynPriceSensor(coordinator, device_info, descr)
         entities.append(sensor)
-
-    _LOGGER.info(f"no error - coordinator data in setup entry: {coordinator.data}")   
+    """
+    _LOGGER.info(f"coordinator data in setup entry: {coordinator.data}")   
     async_add_entities(entities)
 
 

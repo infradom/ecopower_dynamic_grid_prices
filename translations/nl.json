@@ -4,7 +4,7 @@
       "user": {
         "title": "parameters for your setup",
         "data": {
-          "entsoe_token": "Entsoe authentication token (enter None to skip entsoe)",
+          "entsoe_token": "Entsoe authentication token (leave empty to skip entsoe)",
           "entsoe_area": "Entsoe area",
           "name": "Integration name",
           "entsoe_factor_A": "Entsoe scaling factor consumption",
@@ -16,9 +16,9 @@
       }
     },
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "cannot_connect": "cannot connect",
+      "unknown": "[%key:common::config_flow::error::unknown%]",
+      "auth": "Authentication error; Did you provide at least one valid API token?"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
