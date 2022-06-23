@@ -15,6 +15,12 @@ The Entsoe data source is generic and does not know your power providers markup 
 This API provides the actual day-ahead prices that Ecopower will charge for a dynamic contract.
 Current implementation assumes you have a single tarif, no day/night meter.
 
+# Installation
+This custom integration cannot be installed through HACS yet, as we feel it is still too experimental.
+You can install it manually by copying the contents of the dynammic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
+Then under settings->devices&services, press the 'add integration button', type or select DynGridPricesSolar 
+A config dialog will be displayed.
+
 # Configuration parameters:
 - API authentication token for Entsoe. See https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation for information on how to obtain a token. If you only want to use the Ecopower price, leave this field empty. You must either provide an Entsoe token or an API token or both.
 - area code: for Belgium this is 10YBE----------2 (for other areas, see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas.
