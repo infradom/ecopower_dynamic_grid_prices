@@ -119,6 +119,8 @@ class DynPriceSensorDescription(SensorEntityDescription):
     minus: float = None    # scaling factor : result = scale * (value-minus)
     static_value: float = None # fixed static value from config entry
     with_attribs: bool = False # add time series as attributes
+    source: str = 'entsoe' # source of information: entsoe or ecopower
+
 
 
 class DynPriceSensor(DynPriceEntity, SensorEntity):
@@ -161,8 +163,13 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
             else: 
                 searchday = nowday
                 searchhour = nowhour
-            if self.coordinator.data: rec = self.coordinator.data.get((searchday, searchhour, 0,) , None)
-            else: rec = None
+
+            #_LOGGER.info(f"native value: coordinator: {self.coordinator} data: {self.coordinator.data} source: {self.entity_description.source}")
+            rec = None
+            if self.coordinator.data: 
+                try:  rec = self.coordinator.data[self.entity_description.source].get((searchday, searchhour, 0,) , None)
+                except:
+                    if self.coordinator.data[self.entity_description.source] != None: _LOGGER.error(f"cannot find {(searchday, searchhour), } data for {self.entity_description.source} : {self.coordinator.data}")
             #_LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
             if rec:
                 res = rec["price"]
@@ -180,15 +187,16 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
             self._attrs = {}
             localday = datetime.now().day
             localtomorrow = (datetime.now() + timedelta(days=1)).day
-            for (day, hour, minute,), value in self.coordinator.data.items():
-                price = value["price"]
-                zulutime = value["zulutime"]
-                localtime = value["localtime"]
-                if   localtime.day == localday: patt = f"price_{localtime.hour:02}h"
-                elif localtime.day == localtomorrow: patt = f"price_next_day_{localtime.hour:02}h"
-                else: patt = None
-                if patt: self._attrs[patt] = price
-            return self._attrs
+            if self.coordinator.data[self.entity_description.source]:
+                for (day, hour, minute,), value in self.coordinator.data[self.entity_description.source].items():
+                    price = value["price"]
+                    zulutime = value["zulutime"]
+                    localtime = value["localtime"]
+                    if   localtime.day == localday: patt = f"price_{localtime.hour:02}h"
+                    elif localtime.day == localtomorrow: patt = f"price_next_day_{localtime.hour:02}h"
+                    else: patt = None
+                    if patt: self._attrs[patt] = price
+                return self._attrs
         else: return None    
 
 
@@ -206,9 +214,34 @@ async def async_setup_entry(hass, entry, async_add_entities):
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             with_attribs = True,
+            source       = "entsoe",
     )
     device = DynPriceSensor(coordinator, device_info, descr)
     entities.append(device)
+
+    descr = DynPriceSensorDescription( 
+            name="Current Consumption Price Ecopower",
+            key="current_consumpton_price_ecopower",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
+            device_class = DEVICE_CLASS_MONETARY,
+            with_attribs = True,
+            scale        = 0.001,
+            source       = "ecopower_consumption",
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
+
+    descr = DynPriceSensorDescription( 
+            name="Current Injection Price Ecopower",
+            key="current_injection_price_ecopower",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
+            device_class = DEVICE_CLASS_MONETARY,
+            with_attribs = True,
+            scale        = 0.001,
+            source       = "ecopower_injection",
+    )
+    sensor = DynPriceSensor(coordinator, device_info, descr)
+    entities.append(sensor)
 
     descr = DynPriceSensorDescription( 
             name="Current Price Injection",

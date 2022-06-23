@@ -18,7 +18,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import DOMAIN, NAME, CONF_NAME
-from .const import CONF_ENTSOE_TOKEN, CONF_ENTSOE_AREA, CONF_ENTSOE_FACTOR_A, CONF_ENTSOE_FACTOR_B, CONF_ENTSOE_FACTOR_C, CONF_ENTSOE_FACTOR_D
+from .const import CONF_ENTSOE_TOKEN, CONF_ENTSOE_AREA, CONF_ENTSOE_FACTOR_A, CONF_ENTSOE_FACTOR_B, CONF_ENTSOE_FACTOR_C, CONF_ENTSOE_FACTOR_D, CONF_ECOPWR_TOKEN
 from .const import PLATFORMS
 from .__init__ import EntsoeApiClient
 
@@ -65,6 +65,7 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_ENTSOE_FACTOR_B] = 142.0  # per MWh
         user_input[CONF_ENTSOE_FACTOR_C] = 0.001 # scale to kWh
         user_input[CONF_ENTSOE_FACTOR_D] = 23.0   # per MWh
+        user_input[CONF_ECOPWR_TOKEN]    = ""
 
         return await self._show_config_form(user_input)
 
@@ -85,6 +86,7 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_ENTSOE_FACTOR_B, default = user_input[CONF_ENTSOE_FACTOR_B]): cv.positive_float,                    
                     vol.Required(CONF_ENTSOE_FACTOR_C, default = user_input[CONF_ENTSOE_FACTOR_C]): cv.positive_float,
                     vol.Required(CONF_ENTSOE_FACTOR_D, default = user_input[CONF_ENTSOE_FACTOR_D]): cv.positive_float,
+                    vol.Optional(CONF_ECOPWR_TOKEN,    default = user_input[CONF_ECOPWR_TOKEN]): cv.string,
                 }
             ),
             errors=self._errors,
@@ -94,7 +96,7 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Return true if credentials is valid."""
         try:
             session = async_create_clientsession(self.hass)
-            client = EntsoeApiClient(token, area, session)
+            client = EntsoeApiClient(session, token, area)
             await client.async_get_data()
             return True
         except Exception:  # pylint: disable=broad-except

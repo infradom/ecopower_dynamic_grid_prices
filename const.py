@@ -3,9 +3,14 @@
 DOMAIN = "dynamic_grid_prices_solar"
 
 ENTSOE_DAYAHEAD_URL = "https://transparency.entsoe.eu/api?securityToken={TOKEN}&documentType=A44&in_Domain={AREA}&out_Domain={AREA}&periodStart={START}&periodEnd={END}"
-ECOPWR_DAYAHEAD_URL = ""
+ECOPWR_DAYAHEAD_URL = "https://acc.ameo.app/api/v2/characteristics/{CURVE}"
+ECOPWR_INJECTION = 590
+ECOPWR_CONSUMPTION = 622
+ECOPWR_CONSUMPTION_22_7 = 624
+ECOPWR_CONSUMPTION_21_6 = 623
+
 ENTSOE_HEADERS = {"Content-type": "application/xml; charset=UTF-8"}
-ECOPWR_HEADERS = {"Content-type": "application/json; charset=UTF-8"}
+ECOPWR_HEADERS = {"Content-type": "application/json; charset=UTF-8", "authorization": "Bearer {TOKEN}"}
 
 ATTRIBUTION = '@infradom'
 
@@ -34,6 +39,7 @@ CONF_ENTSOE_FACTOR_B = "entsoe_factor_B"
 CONF_ENTSOE_FACTOR_C = "entsoe_factor_C"
 CONF_ENTSOE_FACTOR_D = "entsoe_factor_D"
 CONF_NAME            = "name"
+CONF_ECOPWR_TOKEN    = "ecopower_token"
 
 
 SENSOR = "sensor"

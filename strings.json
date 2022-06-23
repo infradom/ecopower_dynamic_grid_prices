@@ -4,13 +4,14 @@
       "user": {
         "title": "parameters for your setup",
         "data": {
-          "entsoe_token": "Entsoe authentication token",
+          "entsoe_token": "Entsoe authentication token (enter None to skip entsoe)",
           "entsoe_area": "Entsoe area",
           "name": "Integration name",
           "entsoe_factor_A": "Entsoe scaling factor consumption",
           "entsoe_factor_B": "Entsoe additional consumtion fee",
           "entsoe_factor_C": "Entsoe scaling factor production",
-          "entsoe_factor_D": "Entsoe additional production fee"
+          "entsoe_factor_D": "Entsoe additional production fee",
+          "ecopower_token": "Optional Ecopower authorization token"
         }
       }
     },
