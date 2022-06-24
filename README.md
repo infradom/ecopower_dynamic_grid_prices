@@ -38,7 +38,9 @@ The entities contain an attribute list with the detailed day-ahead prices (per h
 Additional entities will be created in future versions to make your automations easier.
 
 # Hourly Pricing Dashboard Card:
+The integration will make it easy to create an apexchart graph using the xxx_raw_data attribute(not yet done)
 If possible, we will try to make this integration compatible with the nice PVPC hourly pricing card (designed for the Spanish net). See https://github.com/danimart1991/pvpc-hourly-pricing-card.  Thanks for this nice work @danimart1991
+
 
 
 # Disclaimer:
