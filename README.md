@@ -41,7 +41,37 @@ Additional entities will be created in future versions to make your automations 
 # Apex Pricing Dashboard Card:
 The integration makes it easy to create an apexchart graph using the xxx_raw_data attribute
 
+```
+type: custom:apexcharts-card
+experimental:
+  color_threshold: true
+graph_span: 24h
+header:
+  title: Electricity Price Today - Ecopower Injection
+  show: true
+span:
+  start: day
+  offset: +0d
+now:
+  show: true
+  label: Now
+series:
+  - entity: sensor.ecopower_injection_price
+    type: column
+    data_generator: |
+      return entity.attributes.raw_today.map((entry) => {
+        return [new Date(entry.start), entry.value];
+      });
+    color_threshold:
+      - value: 0
+        color: green
+        opacity: 1
+      - value: 0.3
+        color: yellow
+      - value: 0.4
+        color: red
 
+```
 
 
 # Disclaimer:
