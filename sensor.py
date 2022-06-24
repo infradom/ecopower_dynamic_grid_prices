@@ -127,9 +127,9 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                 self._attrs = { 
                     'current_price': self.native_value,
                     'average': mean(today),
-                    'off_peak_1': None,
-                    'off_peak_2': None,
-                    'peak': None,
+                    'off_peak_1': 0,
+                    'off_peak_2': 0,
+                    'peak': 0,
                     'min': thismin,
                     'max': thismax,
                     'unit':  {ENERGY_KILO_WATT_HOUR},
