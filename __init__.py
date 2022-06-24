@@ -129,11 +129,7 @@ class EntsoeApiClient:
                         localtime = datetime.fromtimestamp(timestamp)
                         price = float(point['price.amount'])
                         _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
-                        #if   localtime.day == today.day:    patt = f"price_{localtime.hour:02}h"
-                        #elif localtime.day == tomorrow.day: patt = f"price_next_day_{localtime.hour:02}h"
-                        #else patt = None
-                        #if patt: res['points'][patt] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(), "localtime": datetime.fromtimestamp(timestamp).isoformat()}
-                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
+                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime":  datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from entsoe: {res}")
                 return res             
@@ -170,7 +166,7 @@ class EcopowerApiClient:
                         timestamp = zulutime.timestamp()
                         localtime = datetime.fromtimestamp(timestamp)
                         _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
-                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
+                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from ecopower: {res}")
                 return res             
