@@ -57,9 +57,12 @@ span:
 now:
   show: true
   label: Now
+yaxis:
+  - decimals: 2
 series:
   - entity: sensor.ecopower_injection_price
     type: column
+    float_precision: 3
     data_generator: |
       return entity.attributes.raw_today.map((entry) => {
         return [new Date(entry.start), entry.value];
@@ -72,6 +75,7 @@ series:
         color: yellow
       - value: 0.4
         color: red
+
 
 ```
 
