@@ -20,6 +20,9 @@ DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.0.1"
 ISSUE_URL = "https://github.com/infradom/dynamic_grid_prices_solar/issues"
 
+PEAKHOURS = range(8,20)
+OFFPEAKHOURS1 = range(0,8)
+OFFPEAKHOURS2 = range(20,24)
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

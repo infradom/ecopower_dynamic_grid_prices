@@ -16,6 +16,7 @@ from homeassistant.const import (DEVICE_CLASS_MONETARY,)
 from .const import NAME, VERSION, ATTRIBUTION
 from .const import DEFAULT_NAME, DOMAIN, ICON, SENSOR
 from .const import CONF_ENTSOE_TOKEN, CONF_ECOPWR_TOKEN
+from .const import PEAKHOURS, OFFPEAKHOURS1, OFFPEAKHOURS2
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -111,6 +112,9 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                 tomorrow = []
                 raw_today = []
                 raw_tomorrow = []
+                peak = []
+                off_peak_1 = []
+                off_peak_2 = []
                 for (day, hour, minute,), value in self.coordinator.data[self.entity_description.source].items():
                     price = value["price"]
                     if price < thismin: thismin = price
@@ -118,8 +122,11 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                     zulutime = value["zulutime"]
                     localtime = dt.as_local( value["localtime"] )
                     interval = value["interval"]
-                    if   localtime.day == localday:
+                    if localtime.day == localday:
                         today.append(price)
+                        if localtime.hour in PEAKHOURS: peak.append(price)
+                        if localtime.hour in OFFPEAKHOURS1: off_peak_1.append(price)
+                        if localtime.hour in OFFPEAKHOURS2: off_peak_2.append(price)
                         raw_today.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": self._calc_price(price) } )
                     elif localtime.day == localtomorrow:
                         tomorrow.append(price)
@@ -127,9 +134,9 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                 self._attrs = { 
                     'current_price': self.native_value,
                     'average': mean(today),
-                    'off_peak_1': 0,
-                    'off_peak_2': 0,
-                    'peak': 0,
+                    'off_peak_1': mean(off_peak_1) if off_peak_1 else 0,
+                    'off_peak_2': mean(off_peak_2) if off_peak_2 else 0,
+                    'peak': mean(peak) if mean else 0,
                     'min': thismin,
                     'max': thismax,
                     'unit':  {ENERGY_KILO_WATT_HOUR},
