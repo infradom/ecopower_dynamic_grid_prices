@@ -38,8 +38,10 @@ The entities contain an attribute list with the detailed day-ahead prices (per h
 The attribute list is made compatible with the NordPool attributes
 Additional entities will be created in future versions to make your automations easier.
 
-# Apex Pricing Dashboard Card:
-The integration makes it easy to create an apexchart graph using the xxx_raw_data attribute
+# Apexchart Pricing Dashboard Card:
+The integration makes it easy to create an apexchart graph using the raw_today or raw_tomorrow attribute
+For information on how to instaal custom:apexchart, see the appropriate website.
+My very simple initial try uses this yaml code:
 
 ```
 type: custom:apexcharts-card
