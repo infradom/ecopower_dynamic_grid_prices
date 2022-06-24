@@ -2,6 +2,7 @@
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import CURRENCY_EURO, ENERGY_KILO_WATT_HOUR, ENERGY_MEGA_WATT_HOUR
+from homeassistant.util import dt
 from dataclasses import dataclass
 from statistics import mean
 from homeassistant.components.sensor import (
@@ -115,7 +116,7 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                     if price < thismin: thismin = price
                     if price > thismax: thismax = price
                     zulutime = value["zulutime"]
-                    localtime = value["localtime"]
+                    localtime = dt.as_local( value["localtime"] )
                     interval = value["interval"]
                     if   localtime.day == localday:
                         today.append(price)

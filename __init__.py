@@ -21,7 +21,8 @@ from .const import DOMAIN, PLATFORMS, SENSOR
 
 # TODO List the platforms that you want to support.
 
-SCAN_INTERVAL = timedelta(seconds=900)
+SCAN_INTERVAL = timedelta(seconds=10)
+UPDATE_INTERVAL = 900  # update data entities and addtibutes aligned to X seconds interval
 TIMEOUT = 10
 
 _LOGGER = logging.getLogger(__name__)
@@ -189,6 +190,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         self.entsoelastday = None
         self.ecopwrlastday = None
         self.cache = None # merged entsoe and ecopower data
+        self.lastcheck = 0
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
@@ -196,35 +198,38 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         """Update data via library."""
         now = time.time()
         zulutime = time.gmtime(now)
-        if self.entsoeapi: 
-            _LOGGER.info(f"checking if entsoe api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
-            # reduce number of cloud fetches
-            if not self.entsoecache or ((now - self.lastentsoefetch >= 3600) and (zulutime.tm_hour >= 12) and (self.entsoelastday <= zulutime.tm_mday)):
-                try:
-                    res1 = await self.entsoeapi.async_get_data()
-                    if res1:
-                        self.lastfetch = now
-                        self.entsoelastday = res1['lastday']
-                        self.entsoecache = res1['points']
-                except Exception as exception:
-                    raise UpdateFailed() from exception
-        if self.ecopowerapi:
-            _LOGGER.info(f"checking if ecopower api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
-            # reduce number of cloud fetches
-            if (not self.ecopwrcache_c) or (not self.ecopwrcache_i) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.ecopwrlastday <= zulutime.tm_mday)):
-                try:
-                    res2 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_CONSUMPTION))
-                    if res2:
-                        #self.lastecopwrfetch = now
-                        #self.ecopwrlastday = res2['lastday']
-                        self.ecopwrcache_c = res2['points']
-                    res3 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_INJECTION))
-                    if res3:
-                        self.lastecopwrfetch = now
-                        self.ecopwrlastday = res3['lastday']
-                        self.ecopwrcache_i = res3['points']
-                except Exception as exception:
-                    raise UpdateFailed() from exception
+        slot = int(now)//UPDATE_INTERVAL # integer division in python3.x
+        if slot > self.lastcheck: # do nothing unless we are in a new time slot
+            self.lastcheck = slot 
+            if self.entsoeapi: 
+                _LOGGER.info(f"checking if entsoe api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
+                # reduce number of cloud fetches
+                if not self.entsoecache or ((now - self.lastentsoefetch >= 3600) and (zulutime.tm_hour >= 12) and (self.entsoelastday <= zulutime.tm_mday)):
+                    try:
+                        res1 = await self.entsoeapi.async_get_data()
+                        if res1:
+                            self.lastfetch = now
+                            self.entsoelastday = res1['lastday']
+                            self.entsoecache = res1['points']
+                    except Exception as exception:
+                        raise UpdateFailed() from exception
+            if self.ecopowerapi:
+                _LOGGER.info(f"checking if ecopower api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
+                # reduce number of cloud fetches
+                if (not self.ecopwrcache_c) or (not self.ecopwrcache_i) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.ecopwrlastday <= zulutime.tm_mday)):
+                    try:
+                        res2 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_CONSUMPTION))
+                        if res2:
+                            #self.lastecopwrfetch = now
+                            #self.ecopwrlastday = res2['lastday']
+                            self.ecopwrcache_c = res2['points']
+                        res3 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_INJECTION))
+                        if res3:
+                            self.lastecopwrfetch = now
+                            self.ecopwrlastday = res3['lastday']
+                            self.ecopwrcache_i = res3['points']
+                    except Exception as exception:
+                        raise UpdateFailed() from exception
         # return combined cache dictionaries
         return {'entsoe': self.entsoecache, 'ecopower_consumption': self.ecopwrcache_c, 'ecopower_injection': self.ecopwrcache_i}
 
