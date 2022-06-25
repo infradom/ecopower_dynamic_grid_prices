@@ -127,10 +127,10 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                         if localtime.hour in PEAKHOURS: peak.append(price)
                         if localtime.hour in OFFPEAKHOURS1: off_peak_1.append(price)
                         if localtime.hour in OFFPEAKHOURS2: off_peak_2.append(price)
-                        raw_today.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": self._calc_price(price) } )
+                        raw_today.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price } )
                     elif localtime.day == localtomorrow:
                         tomorrow.append(price)
-                        raw_tomorrow.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": self._calc_price(price) } )
+                        raw_tomorrow.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price} )
                 self._attrs = { 
                     'current_price': self.native_value,
                     'average': mean(today),
