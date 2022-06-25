@@ -155,18 +155,16 @@ class EcopowerApiClient:
                     return None
                 xpars = await response.json()
                 res = { 'lastday' : 0, 'points': {} }
-                idContainer = xpars['idContainer']
-                if idContainer:
-                    #jsond = json.dumps(xpars, indent=2)
-                    #_LOGGER.info(jsond)
+                bucketDuration = xpars['bucketDuration']
+                if bucketDuration:
                     series = xpars['values']
-                    seconds = 900
+                    seconds = bucketDuration * 60 # 900
                     for point in series:
                         if point["valueStatus"] == "valid": price = float(point["value"])
                         zulutime = datetime.strptime(point["date"],'%Y-%m-%dT%H:%M:%S+00:00').replace(tzinfo=timezone.utc)
                         timestamp = zulutime.timestamp()
                         localtime = datetime.fromtimestamp(timestamp)
-                        _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
+                        #_LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
                         res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from ecopower: {res}")
