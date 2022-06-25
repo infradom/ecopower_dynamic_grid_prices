@@ -116,7 +116,7 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                 off_peak_1 = []
                 off_peak_2 = []
                 for (day, hour, minute,), value in self.coordinator.data[self.entity_description.source].items():
-                    price = value["price"]
+                    price = self._calc_price(value["price"])
                     if price < thismin: thismin = price
                     if price > thismax: thismax = price
                     zulutime = value["zulutime"]
