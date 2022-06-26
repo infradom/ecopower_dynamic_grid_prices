@@ -16,7 +16,7 @@ My current implementation assumes you have a single tarif, no support yet for da
 
 # Installation
 This custom integration cannot be installed through HACS yet, as we feel it is still too experimental.
-You can install it manually by copying the contents of the ecopower_dynamic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
+You can install it manually by copying the custom_components/ecopower_dynamic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
 Then under settings->devices&services, press the 'add integration button', type or select DynGridPricesSolar 
 A config dialog will be displayed.
 
