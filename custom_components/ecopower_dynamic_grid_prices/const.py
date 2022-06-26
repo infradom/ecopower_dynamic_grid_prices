@@ -1,24 +1,24 @@
 """Constants for the DynGridPrices integration."""
 
-DOMAIN = "dynamic_grid_prices_solar"
+DOMAIN = "ecopower_dynamic_grid_prices"
 
-ENTSOE_DAYAHEAD_URL = "https://transparency.entsoe.eu/api?securityToken={TOKEN}&documentType=A44&in_Domain={AREA}&out_Domain={AREA}&periodStart={START}&periodEnd={END}"
+#ENTSOE_DAYAHEAD_URL = "https://transparency.entsoe.eu/api?securityToken={TOKEN}&documentType=A44&in_Domain={AREA}&out_Domain={AREA}&periodStart={START}&periodEnd={END}"
 ECOPWR_DAYAHEAD_URL = "https://acc.ameo.app/api/v2/characteristics/{CURVE}"
 ECOPWR_INJECTION = 590
 ECOPWR_CONSUMPTION = 622
 ECOPWR_CONSUMPTION_22_7 = 624
 ECOPWR_CONSUMPTION_21_6 = 623
 
-ENTSOE_HEADERS = {"Content-type": "application/xml; charset=UTF-8"}
+#ENTSOE_HEADERS = {"Content-type": "application/xml; charset=UTF-8"}
 ECOPWR_HEADERS = {"Content-type": "application/json; charset=UTF-8", "authorization": "Bearer {TOKEN}"}
 
 ATTRIBUTION = '@infradom'
 
-NAME = "DynGridPricesSolar"
+NAME = "EcopowerDynGridPrices"
 DEFAULT_NAME = DOMAIN
 DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.0.1"
-ISSUE_URL = "https://github.com/infradom/dynamic_grid_prices_solar/issues"
+ISSUE_URL = "https://github.com/infradom/ecopower_dynamic_grid_prices/issues"
 
 PEAKHOURS = range(8,20)
 OFFPEAKHOURS1 = range(0,8)
@@ -35,12 +35,11 @@ If you have any issues with this you need to open an issue here:
 """
 
 # configuration options
-CONF_ENTSOE_TOKEN    = "entsoe_token"
-CONF_ENTSOE_AREA     = "entsoe_area"
-CONF_ENTSOE_FACTOR_A = "entsoe_factor_A"
-CONF_ENTSOE_FACTOR_B = "entsoe_factor_B"
-CONF_ENTSOE_FACTOR_C = "entsoe_factor_C"
-CONF_ENTSOE_FACTOR_D = "entsoe_factor_D"
+CONF_BACKUP_SOURCE   = "backup_source"
+CONF_BACKUP_FACTOR_A = "backup_factor_A"
+CONF_BACKUP_FACTOR_B = "backup_factor_B"
+CONF_BACKUP_FACTOR_C = "backup_factor_C"
+CONF_BACKUP_FACTOR_D = "backup_factor_D"
 CONF_NAME            = "name"
 CONF_ECOPWR_TOKEN    = "ecopower_token"
 

@@ -18,9 +18,9 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import DOMAIN, NAME, CONF_NAME
-from .const import CONF_ENTSOE_TOKEN, CONF_ENTSOE_AREA, CONF_ENTSOE_FACTOR_A, CONF_ENTSOE_FACTOR_B, CONF_ENTSOE_FACTOR_C, CONF_ENTSOE_FACTOR_D, CONF_ECOPWR_TOKEN
+from .const import CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B, CONF_BACKUP_FACTOR_C, CONF_BACKUP_FACTOR_D, CONF_ECOPWR_TOKEN, CONF_BACKUP_SOURCE
 from .const import PLATFORMS
-from .__init__ import EntsoeApiClient, EcopowerApiClient
+from .__init__ import EcopowerApiClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,11 +45,8 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         #     return self.async_abort(reason="single_instance_allowed")
 
         if user_input is not None:
-            entsoe_token = user_input[CONF_ENTSOE_TOKEN]
             ecopwr_token = user_input[CONF_ECOPWR_TOKEN]
-            valid1 = not entsoe_token or await self._test_credentials1( entsoe_token, user_input[CONF_ENTSOE_AREA] )
-            valid2 = not ecopwr_token or await self._test_credentials2( ecopwr_token )
-            valid = valid1 and valid2 and (ecopwr_token or entsoe_token)
+            valid = await self._test_credentials( ecopwr_token )
             if valid:
                 return self.async_create_entry( title=user_input[CONF_NAME], data=user_input )
             else:
@@ -61,13 +58,13 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         user_input = {}
         # Provide defaults for form
         user_input[CONF_NAME]            = NAME
-        user_input[CONF_ENTSOE_TOKEN]    = ""
-        user_input[CONF_ENTSOE_AREA]     = '10YBE----------2'
-        user_input[CONF_ENTSOE_FACTOR_A] = 0.001 *1.06 # scale to kWh
-        user_input[CONF_ENTSOE_FACTOR_B] = 142.0 # per MWh
-        user_input[CONF_ENTSOE_FACTOR_C] = 0.001 # scale to kWh
-        user_input[CONF_ENTSOE_FACTOR_D] = 2.3   # per MWh
+        user_input[CONF_BACKUP_SOURCE]   = ""
+        user_input[CONF_BACKUP_FACTOR_A] = 0.001 *1.06 # scale to kWh
+        user_input[CONF_BACKUP_FACTOR_B] = 142.0 # per MWh
+        user_input[CONF_BACKUP_FACTOR_C] = 0.001 # scale to kWh
+        user_input[CONF_BACKUP_FACTOR_D] = 2.3   # per MWh
         user_input[CONF_ECOPWR_TOKEN]    = ""
+
 
         return await self._show_config_form(user_input)
 
@@ -82,30 +79,19 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {   vol.Required(CONF_NAME,            default = user_input[CONF_NAME]): cv.string,
-                    vol.Optional(CONF_ENTSOE_TOKEN,    default = user_input[CONF_ENTSOE_TOKEN]): cv.string,
-                    vol.Required(CONF_ENTSOE_AREA,     default = user_input[CONF_ENTSOE_AREA]): cv.string,
-                    vol.Required(CONF_ENTSOE_FACTOR_A, default = user_input[CONF_ENTSOE_FACTOR_A]): cv.positive_float,
-                    vol.Required(CONF_ENTSOE_FACTOR_B, default = user_input[CONF_ENTSOE_FACTOR_B]): cv.positive_float,                    
-                    vol.Required(CONF_ENTSOE_FACTOR_C, default = user_input[CONF_ENTSOE_FACTOR_C]): cv.positive_float,
-                    vol.Required(CONF_ENTSOE_FACTOR_D, default = user_input[CONF_ENTSOE_FACTOR_D]): cv.positive_float,
-                    vol.Optional(CONF_ECOPWR_TOKEN,    default = user_input[CONF_ECOPWR_TOKEN]): cv.string,
+                    vol.Required(CONF_ECOPWR_TOKEN,    default = user_input[CONF_ECOPWR_TOKEN]): cv.string,
+                    vol.Optional(CONF_BACKUP_SOURCE,   default = user_input[CONF_BACKUP_SOURCE]): cv.string,
+                    vol.Optional(CONF_BACKUP_FACTOR_A, default = user_input[CONF_BACKUP_FACTOR_A]): cv.positive_float,
+                    vol.Optional(CONF_BACKUP_FACTOR_B, default = user_input[CONF_BACKUP_FACTOR_B]): cv.positive_float,                    
+                    vol.Optional(CONF_BACKUP_FACTOR_C, default = user_input[CONF_BACKUP_FACTOR_C]): cv.positive_float,
+                    vol.Optional(CONF_BACKUP_FACTOR_D, default = user_input[CONF_BACKUP_FACTOR_D]): cv.positive_float,
+
                 }
             ),
             errors=self._errors,
         )
-
-    async def _test_credentials1(self, token, area):
-        """Return true if credentials is valid."""
-        try:
-            session = async_create_clientsession(self.hass)
-            client = EntsoeApiClient(session, token, area)
-            await client.async_get_data()
-            return True
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.error("entsoe credentials failed")
-        return False
     
-    async def _test_credentials2(self, token):
+    async def _test_credentials(self, token):
         """Return true if credentials is valid."""
         try:
             session = async_create_clientsession(self.hass)
