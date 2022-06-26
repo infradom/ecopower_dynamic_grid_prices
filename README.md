@@ -35,11 +35,11 @@ Note that depending on the taxation, these simple scaling formulas may not corre
 # Entities created:
 This integration will create several entities for the different Entsoe and Ecopower injection and consumption prices.
 The entities contain an attribute list with the detailed day-ahead prices (per hour or per 15 minutes).
-The attribute list is made compatible with the NordPool attributes
+The attribute list is made compatible with the NordPool attributes, but the tomorrow entries have been added to the today list.
 Additional entities will be created in future versions to make your automations easier.
 
 # Apexchart Pricing Dashboard Card:
-The integration makes it easy to create an apexchart graph using the raw_today or raw_tomorrow attribute
+The integration makes it easy to create an apexchart graph using the raw_today attribute
 For information on how to instaal custom:apexchart, see the appropriate website.
 My very simple initial try uses this yaml code:
 
@@ -47,9 +47,9 @@ My very simple initial try uses this yaml code:
 type: custom:apexcharts-card
 experimental:
   color_threshold: true
-graph_span: 24h
+graph_span: 48h
 header:
-  title: Electricity Price Today - Ecopower Injection
+  title: Electricity Price - Ecopower Injection
   show: true
 span:
   start: day
