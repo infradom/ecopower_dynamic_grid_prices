@@ -104,14 +104,14 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
         """Return the state attributes."""
         if self.entity_description.with_attribs:
             localday = datetime.now().day
-            localtomorrow = (datetime.now() + timedelta(days=1)).day
+            #localtomorrow = (datetime.now() + timedelta(days=1)).day
             if self.coordinator.data[self.entity_description.source]:
                 thismin = 9999
                 thismax = -9999
                 today = []
-                tomorrow = []
+                #tomorrow = []
                 raw_today = []
-                raw_tomorrow = []
+                #raw_tomorrow = []
                 peak = []
                 off_peak_1 = []
                 off_peak_2 = []
@@ -122,21 +122,22 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                     zulutime = value["zulutime"]
                     localtime = dt.as_local( value["localtime"] )
                     interval = value["interval"]
-                    if localtime.day == localday:
+                    #if localtime.day == localday:
+                    if True: # cleanup later
                         today.append(price)
                         if localtime.hour in PEAKHOURS: peak.append(price)
                         if localtime.hour in OFFPEAKHOURS1: off_peak_1.append(price)
                         if localtime.hour in OFFPEAKHOURS2: off_peak_2.append(price)
                         raw_today.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price } )
-                    elif localtime.day == localtomorrow:
-                        tomorrow.append(price)
-                        raw_tomorrow.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price} )
+                    #elif localtime.day == localtomorrow:
+                    #    tomorrow.append(price)
+                    #    raw_tomorrow.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price} )
                 self._attrs = { 
                     'current_price': self.native_value,
                     'average': mean(today),
                     'off_peak_1': mean(off_peak_1) if off_peak_1 else 0,
                     'off_peak_2': mean(off_peak_2) if off_peak_2 else 0,
-                    'peak': mean(peak) if mean else 0,
+                    'peak': mean(peak) if peak else 0,
                     'min': thismin,
                     'max': thismax,
                     'unit':  {ENERGY_KILO_WATT_HOUR},
@@ -144,14 +145,14 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                     'country': None,
                     'region': 'BE',
                     'low_price': False,
-                    'tomorrow_valid': True,
+                    #'tomorrow_valid': False,
                     'today': today,
-                    'tomorrow': tomorrow,
+                    #'tomorrow': tomorrow,
                     'raw_today': raw_today,
-                    'raw_tomorrow': raw_tomorrow,
+                    #'raw_tomorrow': raw_tomorrow,
                 }
                 return self._attrs
-
+                """
                 for (day, hour, minute,), value in self.coordinator.data[self.entity_description.source].items():
                     price = value["price"]
                     zulutime = value["zulutime"]
@@ -160,7 +161,7 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                     elif localtime.day == localtomorrow: patt = f"price_next_day_{localtime.hour:02}h"
                     else: patt = None
                     if patt: self._attrs[patt] = price
-                return self._attrs
+                return self._attrs"""
         else: return None    
 
 
