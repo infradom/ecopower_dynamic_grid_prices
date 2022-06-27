@@ -110,7 +110,7 @@ class EcopowerApiClient:
                         zulutime = datetime.strptime(point["date"],'%Y-%m-%dT%H:%M:%S+00:00').replace(tzinfo=timezone.utc)
                         timestamp = zulutime.timestamp()
                         localtime = datetime.fromtimestamp(timestamp)
-                        _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
+                        _LOGGER.info(f"ecopower_record {(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
                         res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from ecopower: {res}")
@@ -147,27 +147,40 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         now = time.time()
         zulutime = time.gmtime(now)
         slot = int(now)//UPDATE_INTERVAL # integer division in python3.x
-        if (slot > self.lastcheck) or not(self.ecopwrcache_c and self.backupcache) : # do nothing unless we are in a new time slot, except on startup
+        backupentity = self.entry.data.get(CONF_BACKUP_SOURCE)
+        if (slot > self.lastcheck) or (not self.ecopwrcache_c and self.ecopowerapi) or (not self.backupcache and backupentity) : # do nothing unless we are in a new time slot, except on startup
             self.lastcheck = slot 
+
+
             if self.ecopowerapi:
-                _LOGGER.info(f"checking if ecopower api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
+                _LOGGER.info(f"checking if ecopower api update is needed : {zulutime} not_cache_c: {not self.ecopwrcache_c} not_backupcache: {not self.backupcache} ")
                 # reduce number of cloud fetches
-                if (not self.ecopwrcache_c) or (not self.ecopwrcache_i) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.ecopwrlastday <= zulutime.tm_mday)):
+                if (self.ecopwrcache_c == None) or (self.ecopwrcache_i == None) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.ecopwrlastday <= zulutime.tm_mday)):
                     try:
+                        #if True:
                         res2 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_CONSUMPTION))
                         if res2:
-                            #self.lastecopwrfetch = now
-                            #self.ecopwrlastday = res2['lastday']
-                            self.ecopwrcache_c = res2['points']
+                            # drop data if it does not contain this time and there is a backup
+                            hole = not (res2['points'].get((zulutime.tm_mday, zulutime.tm_hour, 0,)))
+                            if hole: _LOGGER.error(f"ecopower consumption data does not contain this moment")
+                            if backupentity and hole: self.ecopwrcache_c = {} # not None
+                            else: self.ecopwrcache_c = res2['points']
+
                         res3 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_INJECTION))
                         if res3:
                             self.lastecopwrfetch = now
                             self.ecopwrlastday = res3['lastday']
-                            self.ecopwrcache_i = res3['points']
+                            # drop data if it does not contain this time and there is a backup
+                            hole = not (res3['points'].get((zulutime.tm_mday, zulutime.tm_hour, 0,)))
+                            if hole: _LOGGER.error(f"ecopower injection data does not contain this moment")
+                            if backupentity and hole: self.ecopwrcache_i = {} # not None
+                            else: self.ecopwrcache_i = res3['points']
+
                     except Exception as exception:
+                        _LOGGER.error(f"ecopower fetching error")
                         raise UpdateFailed() from exception
 
-            backupentity = self.entry.data.get(CONF_BACKUP_SOURCE)
+
             if backupentity:
                 if (not self.backupcache) or ((now - self.lastbackupfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.backuplastday <= zulutime.tm_mday)):
 
@@ -182,8 +195,8 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                         self.backupcache_c = {}
                         self.backupcache_i = {}
                         self.backupcache = {}
-                        incomplete = (len(self.ecopwrcache_i) < 24*4) or (len(self.ecopwrcache_c) <24*4) 
-                        if incomplete:  _LOGGER.error(f"fetched ecopower results to not cover a full day")
+                        #incomplete = (len(self.ecopwrcache_i) < 24*4) or (len(self.ecopwrcache_c) <24*4) 
+                        #if incomplete:  _LOGGER.error(f"fetched ecopower results to not cover a full day")
                         for inday in ['raw_today', 'raw_tomorrow']:
                             backupdata = backupstate.attributes[inday] 
                             for val in backupdata:
@@ -201,9 +214,11 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                                     self.backupcache[(day, hour, minute,)]   = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
                                     self.backupcache_c[(day, hour, minute,)] = {"price": factor_a * (value + factor_b), "interval": interval, "zulutime": zulustart, "localtime": localstart}
                                     self.backupcache_i[(day, hour, minute,)] = {"price": factor_c * (value - factor_d), "interval": interval, "zulutime": zulustart, "localtime": localstart}
-                                    # fill missing holes in ecopower data
-                                    if self.ecopwrcache_c and not self.ecopwrcache_c.get((day, hour, minute,)): self.ecopwrcache_c[(day,hour,minute,)] = self.backupcache_c[(day,hour,minute,)]
-                                    if self.ecopwrcache_i and not self.ecopwrcache_i.get((day, hour, minute,)): self.ecopwrcache_i[(day,hour,minute,)] = self.backupcache_i[(day,hour,minute,)]
+                                    # fill missing holes in ecopower data - messes up the sequence of the ordered dict
+                                    #if self.ecopwrcache_c and not self.ecopwrcache_c.get((day, hour, minute,)):  self.ecopwrcache_c[(day,hour,minute,)] = self.backupcache_c[(day,hour,minute,)]
+                                    #if self.ecopwrcache_i and not self.ecopwrcache_i.get((day, hour, minute,)):  self.ecopwrcache_i[(day,hour,minute,)] = self.backupcache_i[(day,hour,minute,)]
+                        if self.ecopowerapi and not self.ecopwrcache_c: self.ecopwrcache_c = self.backupcache_c
+                        if self.ecopowerapi and not self.ecopwrcache_i: self.ecopwrcache_i = self.backupcache_i
 
         # return combined cache dictionaries
         return {'backup_ecopower_consumption': self.backupcache_c, 

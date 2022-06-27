@@ -130,13 +130,12 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
                     zulutime = value["zulutime"]
                     localtime = dt.as_local( value["localtime"] )
                     interval = value["interval"]
-                    #if localtime.day == localday:
-                    if True: # cleanup later
-                        today.append(price)
-                        if localtime.hour in PEAKHOURS: peak.append(price)
-                        if localtime.hour in OFFPEAKHOURS1: off_peak_1.append(price)
-                        if localtime.hour in OFFPEAKHOURS2: off_peak_2.append(price)
-                        raw_today.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price } )
+
+                    today.append(price)
+                    if localtime.hour in PEAKHOURS: peak.append(price)
+                    if localtime.hour in OFFPEAKHOURS1: off_peak_1.append(price)
+                    if localtime.hour in OFFPEAKHOURS2: off_peak_2.append(price)
+                    raw_today.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price } )
                     #elif localtime.day == localtomorrow:
                     #    tomorrow.append(price)
                     #    raw_tomorrow.append( {"start": localtime, "end": localtime + timedelta(seconds=interval) , "value": price} )
