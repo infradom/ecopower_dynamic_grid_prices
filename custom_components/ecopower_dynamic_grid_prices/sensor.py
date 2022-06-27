@@ -44,7 +44,7 @@ class DynPriceSensorDescription(SensorEntityDescription):
     minus: float = None    # scaling factor : result = scale * (value-minus)
     static_value: float = None # fixed static value from config entry
     with_attribs: bool = False # add time series as attributes
-    source: str = 'ecopower' # source of information: ecopower by default
+    source: str = 'backup' # source of information: backup by default
 
 
 
@@ -93,10 +93,18 @@ class DynPriceSensor(DynPriceEntity, SensorEntity):
             if self.coordinator.data: 
                 try:  rec = self.coordinator.data[self.entity_description.source].get((nowday, nowhour, 0,) , None)
                 except:
-                    if self.coordinator.data[self.entity_description.source] != None: _LOGGER.error(f"cannot find {(searchday, searchhour), } data for {self.entity_description.source} : {self.coordinator.data}")
+                    #_LOGGER.error(f"trying to fetch from {self.entity_description.source} {nowday} {nowhour} coordinatordata: {self.coordinator.data}")
+                    if self.coordinator.data[self.entity_description.source] != None: _LOGGER.error(f"cannot find {(nowday, nowhour), } data for {self.entity_description.source} : {self.coordinator.data}")
+
             #_LOGGER.error(f"no error - day = {searchday} hour = {searchhour} price = {rec}")
             if rec: return self._calc_price( rec["price"] )
-            else:   return None
+            else:  
+                if not self.entity_description.source.startswith("backup"): # try backup source
+                    try:  rec = self.coordinator.data['backup_'+self.entity_description.source].get((nowday, nowhour, 0,) , None)
+                    except:
+                        if self.coordinator.data['backup_'+self.entity_description.source] != None: _LOGGER.error(f"cannot find {(nowday, nowhour), } data for {'backup_'+self.entity_description.source} : {self.coordinator.data}")
+                    if rec: return self._calc_price( rec["price"] )
+                return None                  
 
     
     @property
@@ -177,7 +185,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         descr = DynPriceSensorDescription( 
             name="Backup Price",
             key="Backup_price",
-            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             with_attribs = True,
             source       = "backup",
@@ -193,6 +201,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             scale=entry.data["backup_factor_A"],
             extra=entry.data["backup_factor_B"],
             with_attribs = True,
+            source = "backup"
         )
         sensor = DynPriceSensor(coordinator, device_info, descr)
         entities.append(sensor)
@@ -205,6 +214,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             scale=entry.data["backup_factor_C"],
             minus=entry.data["backup_factor_D"],
             with_attribs = True,
+            source = "backup"
         )
         sensor = DynPriceSensor(coordinator, device_info, descr)
         entities.append(sensor)
@@ -220,7 +230,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         descr = DynPriceSensorDescription( 
             name="Backup Factor B Consumption Extracost",
             key="Backup_factor_b_consumption_extracost",
-            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             static_value = entry.data["backup_factor_B"],
         )
@@ -238,7 +248,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         descr = DynPriceSensorDescription( 
             name="Backup Factor D Production Extrafee",
             key="Backup_factor_d_production_extrafee",
-            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_MEGA_WATT_HOUR}",
+            native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             static_value = entry.data["backup_factor_D"],
         )
@@ -252,7 +262,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             with_attribs = True,
-            scale        = 0.001,
+            #scale        = 1.0,
             source       = "ecopower_consumption",
         )
         sensor = DynPriceSensor(coordinator, device_info, descr)
@@ -264,7 +274,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             with_attribs = True,
-            scale        = 0.001,
+            #scale        = 1.0,
             source       = "ecopower_injection",
         )
         sensor = DynPriceSensor(coordinator, device_info, descr)

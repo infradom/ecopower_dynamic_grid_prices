@@ -14,7 +14,7 @@ ECOPWR_HEADERS = {"Content-type": "application/json; charset=UTF-8", "authorizat
 
 ATTRIBUTION = '@infradom'
 
-NAME = "EcopowerDynGridPrices"
+NAME = "EcopowerPrices"
 DEFAULT_NAME = DOMAIN
 DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.0.1"

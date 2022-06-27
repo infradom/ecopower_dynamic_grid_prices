@@ -23,7 +23,7 @@ A config dialog will be displayed.
 # Configuration parameters:
 
 - Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token.
-- Backup source (in case ecopower API would be down)
+- Backup source (in case ecopower API would be down). Please note that the backup source must be configured provide cost in € per kWh
 - grid operators may charge different prices than the ones published on the backup source. This integration allows you to declare factors A, B, C, D for some customization or the prices published on the backup source:
   - consume cost: Cost = A * (published_price + B)
   - injection fee:  Fee = C * (published_price - D)

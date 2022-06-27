@@ -17,7 +17,7 @@ import time
 from collections.abc import Mapping
 from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN
 from .const import ECOPWR_CONSUMPTION, ECOPWR_INJECTION, ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL
-from .const import DOMAIN, PLATFORMS, SENSOR
+from .const import DOMAIN, PLATFORMS, SENSOR, CONF_BACKUP_SOURCE, CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B, CONF_BACKUP_FACTOR_C, CONF_BACKUP_FACTOR_D
 
 # TODO List the platforms that you want to support.
 
@@ -47,7 +47,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ecopower_session = async_get_clientsession(hass)
         ecopower_client = EcopowerApiClient(ecopower_session, ecopwr_token)
 
-    coordinator = DynPriceUpdateCoordinator(hass, ecopower_client = ecopower_client)
+    coordinator = DynPriceUpdateCoordinator(hass, ecopower_client = ecopower_client, entry = entry)
     await coordinator.async_refresh()
 
     if not coordinator.last_update_success:
@@ -82,59 +82,10 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
 
-"""
-class EntsoeApiClient:
-    def __init__(self, session: aiohttp.ClientSession, token: str, area: str) -> None:
-        self._token   = token
-        self._area    = area
-        self._session = session
 
-    async def async_get_data(self) -> dict:
-        #today = datetime.now()               # exceptionally in localtime
-        #tomorrow = today + timedelta(days=1) # exceptionally in localtime
-        now = datetime.now(timezone.utc)
-        start = (now + timedelta(days=0)).strftime("%Y%m%d0000") #"202206152200"
-        end   = (now + timedelta(days=1) ).strftime("%Y%m%d0000") #"202206202200"
-        url = ENTSOE_DAYAHEAD_URL.format(TOKEN = self._token, AREA = self._area, START = start, END = end)
-        _LOGGER.info(f"entsoe interval {start} {end} fetchingurl = {url}")
-        try:
-            async with async_timeout.timeout(TIMEOUT):
-                response = await self._session.get(url, headers=ENTSOE_HEADERS)
-                if response.status != 200:
-                    _LOGGER.error(f'invalid response code from entsoe: {response.status}')
-                    return None
-                xml = await response.text()
-                xpars = xmltodict.parse(xml)
-                xpars = xpars['Publication_MarketDocument']
-                #jsond = json.dumps(xpars, indent=2)
-                #_LOGGER.info(jsond)
-                series = xpars['TimeSeries']
-                if isinstance(series, Mapping): series = [series]
-                res = { 'lastday' : 0, 'points': {} }
-                #res = {}
-                for ts in series:
-                    start = ts['Period']['timeInterval']['start']
-                    startts = datetime.strptime(start,'%Y-%m-%dT%H:%MZ').replace(tzinfo=timezone.utc).timestamp()
-                    end = ts['Period']['timeInterval']['end']
-                    if ts['Period']['resolution'] == 'PT60M': seconds = 3600
-                    else: seconds = None
-                    for point in ts['Period']['Point']:
-                        offset = seconds * (int(point['position'])-1)
-                        timestamp = startts + offset
-                        zulutime  = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-                        localtime = datetime.fromtimestamp(timestamp)
-                        price = float(point['price.amount'])
-                        _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
-                        res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime":  datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
-                        if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
-                _LOGGER.info(f"fetched from entsoe: {res}")
-                return res             
-        except Exception as exception:
-            _LOGGER.exception(f"cannot fetch api data from entsoe: {exception}") 
-"""
 
 class EcopowerApiClient:
-    def __init__(self, session: aiohttp.ClientSession, token: str ) -> None:
+    def __init__(self, session: aiohttp.ClientSession, token: str) -> None:
         self._token = token
         self._session = session
 
@@ -155,11 +106,11 @@ class EcopowerApiClient:
                     series = xpars['values']
                     seconds = bucketDuration * 60 # 900
                     for point in series:
-                        if point["valueStatus"] == "valid": price = float(point["value"])
+                        if point["valueStatus"] == "valid": price = float(point["value"])*0.001 # convert source to kWh
                         zulutime = datetime.strptime(point["date"],'%Y-%m-%dT%H:%M:%S+00:00').replace(tzinfo=timezone.utc)
                         timestamp = zulutime.timestamp()
                         localtime = datetime.fromtimestamp(timestamp)
-                        #_LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
+                        _LOGGER.info(f"{(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
                         res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 _LOGGER.info(f"fetched from ecopower: {res}")
@@ -167,22 +118,27 @@ class EcopowerApiClient:
         except Exception as exception:
             _LOGGER.exception(f"cannot fetch api data from ecopower: {exception}") 
 
+
 class DynPriceUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
 
-    def __init__(  self, hass: HomeAssistant, ecopower_client: EcopowerApiClient) -> None:
+    def __init__(  self, hass: HomeAssistant, ecopower_client: EcopowerApiClient, entry: ConfigEntry) -> None:
         """Initialize."""
         self.ecopowerapi = ecopower_client
         self.platforms = []
         self.lastbackupfetch = 0
         self.lastecopwrtecht = 0
+        self.backupcache_c = None
+        self.backupcache_i = None
         self.backupcache = None
         self.ecopwrcache_c = None
         self.ecopwrcache_i = None
-        self.backuplastday = None
-        self.ecopwrlastday = None
+        self.backuplastday = 0
+        self.ecopwrlastday = 0
         self.cache = None # merged entsoe and ecopower data
         self.lastcheck = 0
+        self.hass = hass
+        self.entry = entry
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
@@ -191,7 +147,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         now = time.time()
         zulutime = time.gmtime(now)
         slot = int(now)//UPDATE_INTERVAL # integer division in python3.x
-        if slot > self.lastcheck: # do nothing unless we are in a new time slot
+        if (slot > self.lastcheck) or not(self.ecopwrcache_c and self.backupcache) : # do nothing unless we are in a new time slot, except on startup
             self.lastcheck = slot 
             if self.ecopowerapi:
                 _LOGGER.info(f"checking if ecopower api update is needed or data can be retrieved from cache at zulutime: {zulutime}")
@@ -210,8 +166,48 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                             self.ecopwrcache_i = res3['points']
                     except Exception as exception:
                         raise UpdateFailed() from exception
+
+            backupentity = self.entry.data.get(CONF_BACKUP_SOURCE)
+            if backupentity:
+                if (not self.backupcache) or ((now - self.lastbackupfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.backuplastday <= zulutime.tm_mday)):
+
+                    factor_a = self.entry.data.get(CONF_BACKUP_FACTOR_A)
+                    factor_b = self.entry.data.get(CONF_BACKUP_FACTOR_B)
+                    factor_c = self.entry.data.get(CONF_BACKUP_FACTOR_C)
+                    factor_d = self.entry.data.get(CONF_BACKUP_FACTOR_D)
+                    _LOGGER.info(f"loadingbackup source {backupentity}")
+                    backupstate = self.hass.states.get(backupentity)
+                    if backupstate: 
+                        backupdata = backupstate.attributes['raw_today'] 
+                        self.backupcache_c = {}
+                        self.backupcache_i = {}
+                        self.backupcache = {}
+                        overwrite = (len(self.ecopwrcache_i) < 24*4) or (len(self.ecopwrcache_c) <24*4) 
+                        if overwrite:  _LOGGER.error(f"fetched ecopower results to not cover a full day")
+                        for val in backupdata:
+                            value = val['value']
+                            zulustart = val['start']
+                            timestamp = datetime.timestamp(zulustart)
+                            localstart = datetime.fromtimestamp(timestamp)
+                            day = zulustart.day
+                            hour = zulustart.hour
+                            minute = zulustart.minute
+                            interval = 3600
+                            _LOGGER.info(f"loading backup data: {timestamp} {value} zulutime: {zulustart} localtime: {localstart}")
+                            self.backupcache[(day, hour, minute,)]   = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                            if overwrite:
+                                pass
+                                    #self.ecopwrcache_c[(day, hour, minute,)] = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                                    #self.ecopwrcache_i[(day, hour, minute,)] = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                            self.backupcache_c[(day, hour, minute,)] = {"price": factor_a * (value + factor_b), "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                            self.backupcache_i[(day, hour, minute,)] = {"price": factor_c * (value - factor_d), "interval": interval, "zulutime": zulustart, "localtime": localstart}
+
         # return combined cache dictionaries
-        return {'backup': self.backupcache, 'ecopower_consumption': self.ecopwrcache_c, 'ecopower_injection': self.ecopwrcache_i}
+        return {'backup_ecopower_consumption': self.backupcache_c, 
+                'backup_ecopower_injection': self.backupcache_i, 
+                'backup': self.backupcache,
+                'ecopower_consumption': self.ecopwrcache_c, 
+                'ecopower_injection': self.ecopwrcache_i}
 
 
 

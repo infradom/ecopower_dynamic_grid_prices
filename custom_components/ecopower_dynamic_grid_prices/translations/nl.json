@@ -6,18 +6,18 @@
         "data": {
           "name": "Integration name",
           "backup_factor_A": "Backup source scaling factor consumption",
-          "backup_factor_B": "Backup source additional consumtion fee",
+          "backup_factor_B": "Backup source additional consumption fee",
           "backup_factor_C": "Backup source scaling factor production",
           "backup_factor_D": "Backup source additional production fee",
           "ecopower_token": "Ecopower authorization token",
-          "backup_source": "Entity that can serve as backup source of data"
+          "backup_source": "Entity that can serve as backup source of data. eg. sensor.nordpool_kwh_be_eur..."
         }
       }
     },
     "error": {
       "cannot_connect": "cannot connect",
       "unknown": "[%key:common::config_flow::error::unknown%]",
-      "auth": "Authentication error; Did you provide at least one valid API token?"
+      "auth": "Authentication error; Did you provide at least a valid API token or a valid backup entity?"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"

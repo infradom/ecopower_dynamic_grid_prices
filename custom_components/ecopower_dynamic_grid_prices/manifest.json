@@ -1,6 +1,6 @@
 {
   "domain": "ecopower_dynamic_grid_prices",
-  "name": "EcopowerDynGridPrices",
+  "name": "EcopowerPrices",
   "version": "0.0.1",
   "config_flow": true,
   "documentation": "https:/github.com/infradom/ecopower_dynamic_grid_prices",
