@@ -13,7 +13,7 @@ import xmltodict
 import json
 import logging
 from datetime import datetime, timezone, timedelta
-import time
+import time, pytz
 from collections.abc import Mapping
 from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN
 from .const import ECOPWR_CONSUMPTION, ECOPWR_INJECTION, ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL
@@ -178,29 +178,29 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                     _LOGGER.info(f"loadingbackup source {backupentity}")
                     backupstate = self.hass.states.get(backupentity)
                     if backupstate: 
-                        backupdata = backupstate.attributes['raw_today'] 
+
                         self.backupcache_c = {}
                         self.backupcache_i = {}
                         self.backupcache = {}
-                        overwrite = (len(self.ecopwrcache_i) < 24*4) or (len(self.ecopwrcache_c) <24*4) 
-                        if overwrite:  _LOGGER.error(f"fetched ecopower results to not cover a full day")
-                        for val in backupdata:
-                            value = val['value']
-                            zulustart = val['start']
-                            timestamp = datetime.timestamp(zulustart)
-                            localstart = datetime.fromtimestamp(timestamp)
-                            day = zulustart.day
-                            hour = zulustart.hour
-                            minute = zulustart.minute
-                            interval = 3600
-                            _LOGGER.info(f"loading backup data: {timestamp} {value} zulutime: {zulustart} localtime: {localstart}")
-                            self.backupcache[(day, hour, minute,)]   = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
-                            if overwrite:
-                                pass
-                                    #self.ecopwrcache_c[(day, hour, minute,)] = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
-                                    #self.ecopwrcache_i[(day, hour, minute,)] = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
-                            self.backupcache_c[(day, hour, minute,)] = {"price": factor_a * (value + factor_b), "interval": interval, "zulutime": zulustart, "localtime": localstart}
-                            self.backupcache_i[(day, hour, minute,)] = {"price": factor_c * (value - factor_d), "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                        incomplete = (len(self.ecopwrcache_i) < 24*4) or (len(self.ecopwrcache_c) <24*4) 
+                        if incomplete:  _LOGGER.error(f"fetched ecopower results to not cover a full day")
+                        for inday in ['raw_today', 'raw_tomorrow']:
+                            backupdata = backupstate.attributes[inday] 
+                            for val in backupdata:
+                                value = val['value']
+                                if value:
+                                    localstart = val['start']
+                                    zulustart = val['start'].astimezone(pytz.utc)
+                                    #timestamp = datetime.timestamp(zulustart)
+                                    #localstart = datetime.fromtimestamp(timestamp)
+                                    day = zulustart.day
+                                    hour = zulustart.hour
+                                    minute = zulustart.minute
+                                    interval = 3600
+                                    _LOGGER.info(f"loading backup data: {value} zulutime: {zulustart} localtime: {localstart}")
+                                    self.backupcache[(day, hour, minute,)]   = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                                    self.backupcache_c[(day, hour, minute,)] = {"price": factor_a * (value + factor_b), "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                                    self.backupcache_i[(day, hour, minute,)] = {"price": factor_c * (value - factor_d), "interval": interval, "zulutime": zulustart, "localtime": localstart}
 
         # return combined cache dictionaries
         return {'backup_ecopower_consumption': self.backupcache_c, 
