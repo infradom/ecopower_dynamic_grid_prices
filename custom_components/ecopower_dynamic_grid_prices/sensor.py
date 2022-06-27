@@ -194,8 +194,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         entities.append(sensor)
 
         descr = DynPriceSensorDescription( 
-            name="Computed Price Consumption",
-            key="computed price_consumption",
+            name="Backup Computed Consumption Price",
+            key="backup_computed_consumption_price",
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             scale=entry.data["backup_factor_A"],
@@ -207,8 +207,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         entities.append(sensor)
 
         descr = DynPriceSensorDescription( 
-            name="Computed Price Injection",
-            key="computed_price_injection",
+            name="Backup Computed Injection Price",
+            key="backup_computed_injection_price",
             native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
             device_class = DEVICE_CLASS_MONETARY,
             scale=entry.data["backup_factor_C"],

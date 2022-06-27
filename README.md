@@ -17,13 +17,13 @@ My current implementation assumes you have a single tarif, no support yet for da
 # Installation
 This custom integration cannot be installed through HACS yet, as we feel it is still too experimental.
 You can install it manually by copying the custom_components/ecopower_dynamic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
-Then under settings->devices&services, press the 'add integration button', type or select DynGridPricesSolar 
+Then under settings->devices&services, press the 'add integration button', type or select EcopowerGridPrices 
 A config dialog will be displayed.
 
 # Configuration parameters:
 
-- Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token.
-- Backup source (in case ecopower API would be down). Please note that the backup source must be configured provide cost in € per kWh
+- Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token. If left empty, you must provide a backup source entity (e.g. from the nordpool integration)
+- Backup source (in case ecopower API would be down). Please note that the backup source must be configured provide cost in € per kWh, without VAT
 - grid operators may charge different prices than the ones published on the backup source. This integration allows you to declare factors A, B, C, D for some customization or the prices published on the backup source:
   - consume cost: Cost = A * (published_price + B)
   - injection fee:  Fee = C * (published_price - D)

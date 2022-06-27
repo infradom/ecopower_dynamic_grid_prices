@@ -201,6 +201,9 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                                     self.backupcache[(day, hour, minute,)]   = {"price": value, "interval": interval, "zulutime": zulustart, "localtime": localstart}
                                     self.backupcache_c[(day, hour, minute,)] = {"price": factor_a * (value + factor_b), "interval": interval, "zulutime": zulustart, "localtime": localstart}
                                     self.backupcache_i[(day, hour, minute,)] = {"price": factor_c * (value - factor_d), "interval": interval, "zulutime": zulustart, "localtime": localstart}
+                                    # fill missing holes in ecopower data
+                                    if self.ecopwrcache_c and not self.ecopwrcache_c.get((day, hour, minute,)): self.ecopwrcache_c[(day,hour,minute,)] = self.backupcache_c[(day,hour,minute,)]
+                                    if self.ecopwrcache_i and not self.ecopwrcache_i.get((day, hour, minute,)): self.ecopwrcache_i[(day,hour,minute,)] = self.backupcache_i[(day,hour,minute,)]
 
         # return combined cache dictionaries
         return {'backup_ecopower_consumption': self.backupcache_c, 
