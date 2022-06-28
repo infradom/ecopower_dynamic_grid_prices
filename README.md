@@ -15,9 +15,9 @@ This API provides the actual day-ahead prices that Ecopower will charge for a dy
 My current implementation assumes you have a single tarif, no support yet for day/night meter in this integration.
 
 # Installation
-This custom integration cannot be installed through HACS yet, as we feel it is still too experimental.
+This custom integration cannot yet be installed through HACS, as we feel it is still too experimental.
 You can install it manually by copying the custom_components/ecopower_dynamic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
-Then under settings->devices&services, press the 'add integration button', type or select EcopowerPrices 
+Then under settings->devices&services, press the 'add integration button' (bottom right), type or select EcopowerPrices 
 A config dialog will be displayed.
 
 # Configuration parameters:
@@ -30,7 +30,7 @@ A config dialog will be displayed.
 Note that depending on the taxation, these simple scaling formulas may not correctly provide the real price in your country. They just allow us to have rough feeling of the consumption and injection price.
 
 # Known problems
-Configuration menu: Entering scaling factors or offsets that contain zero's does not always work due to an error in HA. Use the arrow keys (and additonal non-zero digits) as a workaround.
+Configuration menu: Entering scaling factors or offsets that contain zero's does not always work due to an error in HA. Use the arrow keys (and additonal less relevant non-zero digits) as a workaround.
 
 # Entities created:
 This integration will create entitites for the Ecopower injection and consumption prices.
