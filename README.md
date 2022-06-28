@@ -1,8 +1,11 @@
 # ecopower_dynamic_grid_prices
 
+--------
 
-Work in progress ! This will become a HomeAssistant integration. 
-FOR THE TIME BEING, IT IS VERY INCOMPLETE AND UNTESTED
+Work in progress !
+FOR THE TIME BEING, IT IS INSUFFICIENTLY TESTED
+
+---------
 
 This integration will periodically pull the dynamic grid prices from the Belgian Ecopower (trial) API.
 I know similar integrations exist, but this one wont need a dependency on node-red. 

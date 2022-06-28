@@ -3,7 +3,7 @@
   "name": "EcopowerPrices",
   "version": "0.0.1",
   "config_flow": true,
-  "documentation": "https:/github.com/infradom/ecopower_dynamic_grid_prices",
+  "documentation": "https://github.com/infradom/ecopower_dynamic_grid_prices",
   "issue_tracker": "https://github.com/infradom/ecopower_dynamic_grid_prices/issues",
   "requirements": [],
   "ssdp": [],
