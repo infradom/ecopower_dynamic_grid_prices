@@ -1,8 +1,8 @@
 
 {
     "name": "Ecopower Dynamic Grid Prices",
-    "render_readme": true,
-    "domains": [
-        "sensor"
-    ]
+    "render_readme": true //,
+//    "domains": [
+//        "sensor"
+//    ]
 }
