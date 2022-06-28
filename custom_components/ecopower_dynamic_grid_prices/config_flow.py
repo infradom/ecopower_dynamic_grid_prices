@@ -16,6 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import DOMAIN, NAME, CONF_NAME
@@ -84,7 +85,7 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {   vol.Required(CONF_NAME,            default = user_input[CONF_NAME]): cv.string,
                     vol.Required(CONF_ECOPWR_TOKEN,    default = user_input[CONF_ECOPWR_TOKEN]): cv.string,
-                    vol.Optional(CONF_BACKUP_SOURCE,   default = user_input[CONF_BACKUP_SOURCE]): cv.string,
+                    vol.Optional(CONF_BACKUP_SOURCE,   default = user_input[CONF_BACKUP_SOURCE]): selector.EntitySelector( selector.EntitySelectorConfig(domain="sensor"),),
                     vol.Optional(CONF_BACKUP_FACTOR_A, default = user_input[CONF_BACKUP_FACTOR_A]): float, # should be cv.positive_float
                     vol.Optional(CONF_BACKUP_FACTOR_B, default = user_input[CONF_BACKUP_FACTOR_B]): float, # should be cv.positive_float                  
                     vol.Optional(CONF_BACKUP_FACTOR_C, default = user_input[CONF_BACKUP_FACTOR_C]): float, # should be cv.positive_float
