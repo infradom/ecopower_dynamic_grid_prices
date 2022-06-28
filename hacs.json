@@ -1,9 +1,6 @@
 {
     "name": "Ecopower Dynamic Grid Prices",
     "hacs": "1.6.0",
-    "domains": [
-        "sensor"
-    ],
     "render_readme": true,
     "homeassistant": "0.118.0"
 }
