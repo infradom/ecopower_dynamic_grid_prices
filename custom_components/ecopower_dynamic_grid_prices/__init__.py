@@ -109,10 +109,11 @@ class EcopowerApiClient:
                         zulutime = datetime.strptime(point["date"],'%Y-%m-%dT%H:%M:%S+00:00').replace(tzinfo=timezone.utc)
                         timestamp = zulutime.timestamp()
                         localtime = datetime.fromtimestamp(timestamp)
-                        _LOGGER.info(f"ecopower_record {(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
+                        #_LOGGER.info(f"ecopower_record {(zulutime.day, zulutime.hour, zulutime.minute,)} zulutime={datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()}Z localtime={datetime.fromtimestamp(timestamp).isoformat()} price={price}" )
                         res['points'][(zulutime.day, zulutime.hour, zulutime.minute,)] = {"price": price, "interval": seconds, "zulutime": datetime.fromtimestamp(timestamp, tz=timezone.utc), "localtime": datetime.fromtimestamp(timestamp)}
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
-                _LOGGER.info(f"fetched from ecopower: {res}")
+                #_LOGGER.info(f"fetched from ecopower: {res}")
+                _LOGGER.info(f"fetched from ecopower: lastday: {res['lastday']}")
                 return res             
         except Exception as exception:
             _LOGGER.exception(f"cannot fetch api data from ecopower: {exception}") 
@@ -193,8 +194,8 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                         day = 0
                         self.backupcache_c = {}
                         self.backupcache_i = {}
-                        self.backupcache = {}
-                        
+                        self.backupcache   = {}
+
                         for inday in ['raw_today', 'raw_tomorrow']:
                             backupdata = backupstate.attributes[inday] 
                             for val in backupdata:

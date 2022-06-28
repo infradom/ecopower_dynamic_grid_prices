@@ -177,7 +177,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     """Setup sensor platform."""
     entities = []
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    _LOGGER.info(f"no error - device entry content {dir(entry)} entry_id: {entry.entry_id} data: {entry.data} options: {entry.options} state: {entry.state} source: {entry.source}")
+    _LOGGER.info(f"device entry content {dir(entry)} entry_id: {entry.entry_id} data: {entry.data} options: {entry.options} state: {entry.state} source: {entry.source}")
     device_info = { "identifiers": {(DOMAIN,)},   "name" : NAME, }
     # entry.data is a dict that the config flow attributes
     if entry.data[CONF_BACKUP_SOURCE]:
@@ -279,7 +279,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         sensor = DynPriceSensor(coordinator, device_info, descr)
         entities.append(sensor)
 
-    _LOGGER.info(f"coordinator data in setup entry: {coordinator.data}")   
+    #_LOGGER.info(f"coordinator data in setup entry: {coordinator.data}")   
     async_add_entities(entities)
 
 
