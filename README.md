@@ -3,7 +3,7 @@
 --------
 
 Work in progress !
-FOR THE TIME BEING, IT IS INSUFFICIENTLY TESTED
+
 
 ---------
 
