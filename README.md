@@ -4,7 +4,6 @@
 
 Work in progress !
 
-
 ---------
 
 This integration will periodically pull the dynamic grid prices from the Belgian Ecopower (trial) API.
