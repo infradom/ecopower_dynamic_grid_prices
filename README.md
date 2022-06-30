@@ -25,7 +25,7 @@ A config dialog will be displayed.
 # Configuration parameters:
 
 - Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token. If left empty, you must provide a backup source entity (e.g. from the nordpool integration)
-_ API curve id's for consumption and injection (obtained from Ecopower)
+- API curve id's for consumption and injection (obtained from Ecopower)
 - (optional) Backup source entity id (used in case ecopower API would be down). Please note that the backup source must be configured so that it provides cost in € per kWh, without VAT. This has only been tested for the nordpool integration that has typically a entity id name like 'sensor.nordpool_kwh_be_eur_3_10_0' 
 - grid operators may charge different prices than the ones published on the backup source. This integration allows you to declare factors A, B, C, D for some customization or the prices published on the backup source:
   - consume cost: Cost = A * (published_price + B)
