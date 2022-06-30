@@ -3,11 +3,13 @@
 DOMAIN = "ecopower_dynamic_grid_prices"
 
 #ENTSOE_DAYAHEAD_URL = "https://transparency.entsoe.eu/api?securityToken={TOKEN}&documentType=A44&in_Domain={AREA}&out_Domain={AREA}&periodStart={START}&periodEnd={END}"
-ECOPWR_DAYAHEAD_URL = "https://acc.ameo.app/api/v2/characteristics/{CURVE}"
-ECOPWR_INJECTION = 590
-ECOPWR_CONSUMPTION = 622
-ECOPWR_CONSUMPTION_22_7 = 624
-ECOPWR_CONSUMPTION_21_6 = 623
+ECOPWR_DAYAHEAD_URL_ACC = "https://acc.ameo.app/api/v2/characteristics/{CURVE}"
+ECOPWR_DAYAHEAD_URL = "https://cloud.ameo.app/api/v2/characteristics/{CURVE}"
+
+#ECOPWR_INJECTION_ACC = 590
+#ECOPWR_CONSUMPTION_ACC = 622
+#ECOPWR_CONSUMPTION_22_7_ACC = 624
+#ECOPWR_CONSUMPTION_21_6_ACC = 623
 
 #ENTSOE_HEADERS = {"Content-type": "application/xml; charset=UTF-8"}
 ECOPWR_HEADERS = {"Content-type": "application/json; charset=UTF-8", "authorization": "Bearer {TOKEN}"}
@@ -42,6 +44,8 @@ CONF_BACKUP_FACTOR_C = "backup_factor_C"
 CONF_BACKUP_FACTOR_D = "backup_factor_D"
 CONF_NAME            = "name"
 CONF_ECOPWR_TOKEN    = "ecopower_token"
+CONF_ECOPWR_API_C    = "api_id_cons"
+CONF_ECOPWR_API_I    = "api_id_inj"
 
 
 SENSOR = "sensor"

@@ -10,7 +10,9 @@
           "backup_factor_C": "Backup source scaling factor production",
           "backup_factor_D": "Backup source additional production fee",
           "ecopower_token": "Ecopower authorization token",
-          "backup_source": "Entity that can serve as backup source of data. eg. sensor.nordpool_kwh_be_eur..."
+          "backup_source": "Entity that can serve as backup source of data. eg. sensor.nordpool_kwh_be_eur...",
+          "api_id_cons": "consumption API id",
+          "api_id_inj": "injection API id"
         }
       }
     },

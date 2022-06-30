@@ -15,14 +15,15 @@ from datetime import datetime, timezone, timedelta
 import time, pytz
 from collections.abc import Mapping
 from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN
-from .const import ECOPWR_CONSUMPTION, ECOPWR_INJECTION, ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL
-from .const import DOMAIN, PLATFORMS, SENSOR, CONF_BACKUP_SOURCE, CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B, CONF_BACKUP_FACTOR_C, CONF_BACKUP_FACTOR_D
+from .const import ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL
+from .const import DOMAIN, PLATFORMS, SENSOR, CONF_BACKUP_SOURCE, CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B
+from .const import CONF_BACKUP_FACTOR_C, CONF_BACKUP_FACTOR_D, CONF_ECOPWR_API_C, CONF_ECOPWR_API_I
 
 # TODO List the platforms that you want to support.
 
 SCAN_INTERVAL = timedelta(seconds=10)
 UPDATE_INTERVAL = 900  # update data entities and addtibutes aligned to X seconds interval
-TIMEOUT = 10
+TIMEOUT = 8
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,9 +43,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     ecopower_client = None
     ecopwr_token = entry.data.get(CONF_ECOPWR_TOKEN)
+    curve_c = entry.data.get(CONF_ECOPWR_API_C)
+    curve_i = entry.data.get(CONF_ECOPWR_API_I)
     if ecopwr_token:
         ecopower_session = async_get_clientsession(hass)
-        ecopower_client = EcopowerApiClient(ecopower_session, ecopwr_token)
+        ecopower_client = EcopowerApiClient(ecopower_session, ecopwr_token, curve_c, curve_i)
 
     coordinator = DynPriceUpdateCoordinator(hass, ecopower_client = ecopower_client, entry = entry)
     await coordinator.async_refresh()
@@ -84,11 +87,14 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 class EcopowerApiClient:
-    def __init__(self, session: aiohttp.ClientSession, token: str) -> None:
+    def __init__(self, session: aiohttp.ClientSession, token: str, curve_c, curve_i) -> None:
         self._token = token
         self._session = session
+        self._url_c = ECOPWR_DAYAHEAD_URL.format(CURVE=curve_c)
+        self._url_i = ECOPWR_DAYAHEAD_URL.format(CURVE=curve_i)
+        #_LOGGER.debug(f"urls: {self._url_c}, {self.url_i}")
 
-    async def async_get_data(self, url: str = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_CONSUMPTION) ) -> dict:
+    async def async_get_data(self, url) -> dict:
         now = datetime.now(timezone.utc)
         try:
             async with async_timeout.timeout(TIMEOUT):
@@ -139,6 +145,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         self.lastcheck = 0
         self.hass = hass
         self.entry = entry
+        self.client = ecopower_client
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
@@ -158,7 +165,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                 if (self.ecopwrcache_c == None) or (self.ecopwrcache_i == None) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.ecopwrlastday <= zulutime.tm_mday)):
                     try:
                         #if True:
-                        res2 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_CONSUMPTION))
+                        res2 = await self.ecopowerapi.async_get_data(url = self.client._url_c )
                         if res2:
                             # drop data if it does not contain this time and there is a backup
                             hole = not (res2['points'].get((zulutime.tm_mday, zulutime.tm_hour, 0,)))
@@ -166,7 +173,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                             if backupentity and hole: self.ecopwrcache_c = {} # not None
                             else: self.ecopwrcache_c = res2['points']
 
-                        res3 = await self.ecopowerapi.async_get_data(url = ECOPWR_DAYAHEAD_URL.format(CURVE=ECOPWR_INJECTION))
+                        res3 = await self.ecopowerapi.async_get_data(url = self.client._url_i )
                         if res3:
                             self.lastecopwrfetch = now
                             self.ecopwrlastday = res3['lastday']

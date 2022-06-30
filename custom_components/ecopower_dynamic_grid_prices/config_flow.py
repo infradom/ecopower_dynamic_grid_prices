@@ -20,7 +20,8 @@ from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import DOMAIN, NAME, CONF_NAME
-from .const import CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B, CONF_BACKUP_FACTOR_C, CONF_BACKUP_FACTOR_D, CONF_ECOPWR_TOKEN, CONF_BACKUP_SOURCE
+from .const import CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B, CONF_BACKUP_FACTOR_C, ECOPWR_DAYAHEAD_URL
+from .const import CONF_BACKUP_FACTOR_D, CONF_ECOPWR_TOKEN, CONF_BACKUP_SOURCE, CONF_ECOPWR_API_C, CONF_ECOPWR_API_I
 from .const import PLATFORMS
 from .__init__ import EcopowerApiClient
 
@@ -48,8 +49,10 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             ecopwr_token = user_input[CONF_ECOPWR_TOKEN]
+            curve_c = user_input[CONF_ECOPWR_API_C]
+            curve_i = user_input[CONF_ECOPWR_API_I]
             backupentity = user_input[CONF_BACKUP_SOURCE]
-            valid1 = not ecopwr_token or await self._test_credentials( ecopwr_token )
+            valid1 = not ecopwr_token or await self._test_credentials( ecopwr_token, curve_c, curve_i )
             valid2 = not backupentity or self._test_backup(backupentity)
             valid = valid1 and valid2 and (ecopwr_token or backupentity)
             if valid:
@@ -69,6 +72,8 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_BACKUP_FACTOR_C] = 1.0001 #0.001 # scale to kWh
         user_input[CONF_BACKUP_FACTOR_D] = 0.0023   # per MWh
         user_input[CONF_ECOPWR_TOKEN]    = ""
+        user_input[CONF_ECOPWR_API_C]    = ""
+        user_input[CONF_ECOPWR_API_I]    = ""
 
 
         return await self._show_config_form(user_input)
@@ -85,6 +90,8 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {   vol.Required(CONF_NAME,            default = user_input[CONF_NAME]): cv.string,
                     vol.Required(CONF_ECOPWR_TOKEN,    default = user_input[CONF_ECOPWR_TOKEN]): cv.string,
+                    vol.Required(CONF_ECOPWR_API_C,    default = user_input[CONF_ECOPWR_API_C]): cv.string,
+                    vol.Required(CONF_ECOPWR_API_I,    default = user_input[CONF_ECOPWR_API_I]): cv.string,
                     vol.Optional(CONF_BACKUP_SOURCE,   default = user_input[CONF_BACKUP_SOURCE]): selector.EntitySelector( selector.EntitySelectorConfig(domain="sensor"),),
                     vol.Optional(CONF_BACKUP_FACTOR_A, default = user_input[CONF_BACKUP_FACTOR_A]): float, # should be cv.positive_float
                     vol.Optional(CONF_BACKUP_FACTOR_B, default = user_input[CONF_BACKUP_FACTOR_B]): float, # should be cv.positive_float                  
@@ -95,12 +102,13 @@ class DynPricesFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=self._errors,
         )
     
-    async def _test_credentials(self, token):
+    async def _test_credentials(self, token, curve_c, curve_i ):
         """Return true if credentials is valid."""
+        #_LOGGER.info(f"testing credentials: {curve_c} {ECOPWR_DAYAHEAD_URL}")
         try:
             session = async_create_clientsession(self.hass)
-            client = EcopowerApiClient(session, token)
-            await client.async_get_data()
+            client = EcopowerApiClient(session, token, curve_c, curve_i)
+            await client.async_get_data(ECOPWR_DAYAHEAD_URL.format(CURVE=curve_c))
             return True
         except Exception:  # pylint: disable=broad-except
             _LOGGER.error("ecopower credentials failed")
