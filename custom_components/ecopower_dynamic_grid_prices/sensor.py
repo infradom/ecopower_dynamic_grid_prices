@@ -1,7 +1,7 @@
 """Sensor platform for integration_blueprint."""
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.const import ENERGY_KILO_WATT_HOUR, ENERGY_MEGA_WATT_HOUR
+from homeassistant.const import ENERGY_KILO_WATT_HOUR, ENERGY_MEGA_WATT_HOUR, CURRENCY_EURO
 from homeassistant.util import dt
 from dataclasses import dataclass
 from statistics import mean
@@ -19,8 +19,6 @@ from .const import CONF_ECOPWR_TOKEN, CONF_BACKUP_SOURCE
 from .const import PEAKHOURS, OFFPEAKHOURS1, OFFPEAKHOURS2
 import logging
 
-#from homeassistant.const import CURRENCY_EURO
-CURRENCY_EURO = "EUR" # € sign was not treated well in grafana/influx
 
 _LOGGER = logging.getLogger(__name__)
 
