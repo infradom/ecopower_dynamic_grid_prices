@@ -120,7 +120,11 @@ class EcopowerApiClient:
                         if zulutime.day > res['lastday']: res['lastday'] = zulutime.day
                 #_LOGGER.info(f"fetched from ecopower: {res}")
                 _LOGGER.info(f"fetched from ecopower: lastday: {res['lastday']}")
-                return res             
+                return res 
+        except CancelledError:
+            _LOGGER.exception(f"cancelled error received during {url} fetch")
+            # cleanup
+            raise     
         except Exception as exception:
             _LOGGER.exception(f"cannot fetch api data from ecopower: {exception}") 
 
