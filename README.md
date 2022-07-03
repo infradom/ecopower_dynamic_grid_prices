@@ -2,10 +2,6 @@
 
 --------
 
-Work in progress !
-
----------
-
 This integration will periodically pull the dynamic grid prices from the Belgian Ecopower API.
 I know similar integrations exist, but this one wont need a dependency on node-red. 
 The Nordpool integration is a good alternative, but has no knowledge of the ecopower prices.
