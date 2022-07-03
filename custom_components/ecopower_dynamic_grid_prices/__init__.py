@@ -170,14 +170,15 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
                     try:
                         #if True:
                         res2 = await self.ecopowerapi.async_get_data(url = self.client._url_c )
+                        _LOGGER.info("fetched ecopower consumption url")
                         if res2:
                             # drop data if it does not contain this time and there is a backup
                             hole = not (res2['points'].get((zulutime.tm_mday, zulutime.tm_hour, 0,)))
                             if hole: _LOGGER.error(f"ecopower consumption data does not contain this moment")
                             if backupentity and hole: self.ecopwrcache_c = {} # not None
                             else: self.ecopwrcache_c = res2['points']
-
                         res3 = await self.ecopowerapi.async_get_data(url = self.client._url_i )
+                        _LOGGER.info("fetched ecopower injection url")
                         if res3:
                             self.lastecopwrfetch = now
                             self.ecopwrlastday = res3['lastday']
@@ -189,7 +190,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
 
                     except Exception as exception:
                         _LOGGER.error(f"ecopower fetching error")
-                        raise UpdateFailed() from exception
+                        #raise UpdateFailed() from exception
 
 
             if backupentity:
