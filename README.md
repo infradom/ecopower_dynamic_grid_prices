@@ -13,8 +13,13 @@ This API provides the actual day-ahead prices that Ecopower will charge for a dy
 My current implementation assumes you have a single tarif, no support yet for day/night meter in this integration.
 
 # Installation
-This custom integration should appaer soon on HACS. 
-For the time being, you can install it manually by copying the custom_components/ecopower_dynamic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
+
+## HACS install
+This custom integration should appear soon in the HACS default store. 
+As long as this is not visible,  go to HACS > integrations tab, click on the 3 dots in the top right corner, select custom repositories and add the https://github.com/infradom/ecopower_dynamic_grid_prices url to the repositories, with category 'integration'. A restart is required to load the integration and make it visible.
+
+## Manual install
+You can also install this also manually by copying the custom_components/ecopower_dynamic_grid_prices folder to your home assistant's config/custom_components folder. A restart your HA software may be required.
 Then under settings->devices&services, press the 'add integration button' (bottom right), type or select EcopowerPrices 
 A config dialog will be displayed.
 
