@@ -12,7 +12,7 @@ The Nordpool integration is a good alternative, but has no knowledge of the ecop
 I also have a prototype integration for Entsoe that could be used.
 
 
-## Ecopower (trial) data source (Ecopower customers only)
+## Ecopower data source (Ecopower customers only)
 This API provides the actual day-ahead prices that Ecopower will charge for a dynamic contract.
 My current implementation assumes you have a single tarif, no support yet for day/night meter in this integration.
 
