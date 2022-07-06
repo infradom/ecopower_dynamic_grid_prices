@@ -34,8 +34,8 @@ A config dialog will be displayed.
 Note that depending on the taxation, these simple scaling formulas may not correctly provide the real price in your country. They just allow us to have rough feeling of the consumption and injection price.
 
 # Known problems
-Configuration menu: Entering scaling factors or offsets that contain zero's does not always work due to an error in HA. Use the arrow keys (and additonal less relevant non-zero digits) as a workaround.
-Backup data source must be selected and cannot be left empty in the current version
+- Configuration menu: Entering scaling factors or offsets that contain zero's does not always work due to an error in HA. Use the arrow keys (and additonal less relevant non-zero digits) as a workaround.
+- Backup data source must be selected and cannot be left empty in the current version of the configuration menu
 
 # Entities created:
 This integration will create entitites for the Ecopower injection and consumption prices.
