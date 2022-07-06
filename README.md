@@ -35,6 +35,7 @@ Note that depending on the taxation, these simple scaling formulas may not corre
 
 # Known problems
 Configuration menu: Entering scaling factors or offsets that contain zero's does not always work due to an error in HA. Use the arrow keys (and additonal less relevant non-zero digits) as a workaround.
+Backup data source must be selected and cannot be left empty in the current version
 
 # Entities created:
 This integration will create entitites for the Ecopower injection and consumption prices.
