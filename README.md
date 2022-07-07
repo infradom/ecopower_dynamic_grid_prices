@@ -7,6 +7,11 @@ I know similar integrations exist, but this one wont need a dependency on node-r
 The Nordpool integration is a good alternative, but has no knowledge of the ecopower prices.
 I also have a prototype integration for Entsoe that could be used.
 
+# Disclaimer:
+ - Errors in this software can have a significant impact on your electricity bill.
+ The authors cannot be held liable for any financial or other damage caused by the use of this software. 
+ - Ecopower has not been involved in the development of this software and cannot be held responsible for any malfunctions.
+
 
 ## Ecopower data source (Ecopower customers only)
 This API provides the actual day-ahead prices that Ecopower will charge for a dynamic contract.
@@ -35,7 +40,6 @@ Note that depending on the taxation, these simple scaling formulas may not corre
 
 # Known problems
 - Configuration menu: Entering scaling factors or offsets that contain zero's does not always work due to an error in HA. Use the arrow keys (and additonal less relevant non-zero digits) as a workaround.
-- Backup data source must be selected and cannot be left empty in the current version of the configuration menu
 
 # Entities created:
 This integration will create entitites for the Ecopower injection and consumption prices.
@@ -86,6 +90,4 @@ series:
 ```
 
 
-# Disclaimer:
- Errors in this software can have a significant impact on your electricity bill.
- The authors cannot be held liable for any financial or other damage caused by the use of this software. 
+
