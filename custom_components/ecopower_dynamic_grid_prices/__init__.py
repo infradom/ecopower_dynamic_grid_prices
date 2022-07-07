@@ -14,8 +14,8 @@ import logging
 from datetime import datetime, timezone, timedelta
 import time, pytz
 from collections.abc import Mapping
-from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN
-from .const import ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL
+from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN, CONF_TEST_API
+from .const import ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL_ACC
 from .const import DOMAIN, PLATFORMS, SENSOR, CONF_BACKUP_SOURCE, CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B
 from .const import CONF_BACKUP_FACTOR_C, CONF_BACKUP_FACTOR_D, CONF_ECOPWR_API_C, CONF_ECOPWR_API_I
 
@@ -45,9 +45,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ecopwr_token = entry.data.get(CONF_ECOPWR_TOKEN)
     curve_c = entry.data.get(CONF_ECOPWR_API_C)
     curve_i = entry.data.get(CONF_ECOPWR_API_I)
+    test_api = entry.data.get(CONF_TEST_API)
     if ecopwr_token:
         ecopower_session = async_get_clientsession(hass)
-        ecopower_client = EcopowerApiClient(ecopower_session, ecopwr_token, curve_c, curve_i)
+        ecopower_client = EcopowerApiClient(ecopower_session, ecopwr_token, curve_c, curve_i, test_api)
 
     coordinator = DynPriceUpdateCoordinator(hass, ecopower_client = ecopower_client, entry = entry)
     await coordinator.async_refresh()
@@ -87,11 +88,15 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 class EcopowerApiClient:
-    def __init__(self, session: aiohttp.ClientSession, token: str, curve_c, curve_i) -> None:
+    def __init__(self, session: aiohttp.ClientSession, token: str, curve_c, curve_i, test_api) -> None:
         self._token = token
         self._session = session
+        self._test_api = test_api
         self._url_c = ECOPWR_DAYAHEAD_URL.format(CURVE=curve_c)
         self._url_i = ECOPWR_DAYAHEAD_URL.format(CURVE=curve_i)
+        if self._test_api:
+            self._url_c = ECOPWR_DAYAHEAD_URL_ACC.format(CURVE=curve_c)
+            self._url_i = ECOPWR_DAYAHEAD_URL_ACC.format(CURVE=curve_i)
         #_LOGGER.debug(f"urls: {self._url_c}, {self.url_i}")
 
     async def async_get_data(self, url) -> dict:
@@ -99,7 +104,7 @@ class EcopowerApiClient:
         try:
             async with async_timeout.timeout(TIMEOUT):
                 headers = ECOPWR_HEADERS
-                headers['authorization'] = headers['authorization'].format(TOKEN = self._token)
+                headers['authorization'] = f"Bearer {self._token}"
                 response = await self._session.get(url, headers=headers)
                 if response.status != 200:
                     _LOGGER.error(f'invalid response code from ecopower: {response.status}')

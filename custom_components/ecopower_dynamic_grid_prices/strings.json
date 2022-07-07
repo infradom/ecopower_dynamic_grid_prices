@@ -9,10 +9,23 @@
           "backup_factor_B": "Backup source additional consumption fee",
           "backup_factor_C": "Backup source scaling factor production",
           "backup_factor_D": "Backup source additional production fee",
-          "ecopower_token": "Ecopower authorization token",
+          "ecopower_token":  "Ecopower authorization token",
+          "backup_flag":     "Configure a backup source of data",
           "backup_source": "Entity that can serve as backup source of data. eg. sensor.nordpool_kwh_be_eur...",
           "api_id_cons": "consumption API id",
-          "api_id_inj": "injection API id"
+          "api_id_inj": "injection API id",
+          "test_api": "Use Test API instead (id: 622, 590)"
+        }
+      },
+      "backup": {
+        "title": "parameters for your setup",
+        "data": {
+          "name": "Integration name",
+          "backup_factor_A": "Backup source scaling factor consumption",
+          "backup_factor_B": "Backup source additional consumption fee",
+          "backup_factor_C": "Backup source scaling factor production",
+          "backup_factor_D": "Backup source additional production fee",
+          "backup_source": "Entity that can serve as backup source of data. eg. sensor.nordpool_kwh_be_eur..."
         }
       }
     },
@@ -22,14 +35,16 @@
       "auth": "Authentication error; Did you provide at least a valid API token or a valid backup entity?"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "cannot_authenticate": "Authentication error; Did you provide a valid API token?"
     }
   },
   "options": {
         "step": {
             "user": {
                 "data": {
-                    "sensor": "Sensor enabled"
+                    "sensor": "Sensor enabled",
+                    "backup_source": "Entity that can serve as backup source of data. eg. sensor.nordpool_kwh_be_eur..."
                 }
             }
         }

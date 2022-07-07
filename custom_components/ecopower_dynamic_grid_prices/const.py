@@ -19,7 +19,7 @@ ATTRIBUTION = '@infradom'
 NAME = "EcopowerPrices"
 DEFAULT_NAME = DOMAIN
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.1"
+VERSION = "0.0.7"
 ISSUE_URL = "https://github.com/infradom/ecopower_dynamic_grid_prices/issues"
 
 PEAKHOURS = range(8,20)
@@ -37,6 +37,7 @@ If you have any issues with this you need to open an issue here:
 """
 
 # configuration options
+CONF_BACKUP          = "backup_flag"
 CONF_BACKUP_SOURCE   = "backup_source"
 CONF_BACKUP_FACTOR_A = "backup_factor_A"
 CONF_BACKUP_FACTOR_B = "backup_factor_B"
@@ -46,6 +47,7 @@ CONF_NAME            = "name"
 CONF_ECOPWR_TOKEN    = "ecopower_token"
 CONF_ECOPWR_API_C    = "api_id_cons"
 CONF_ECOPWR_API_I    = "api_id_inj"
+CONF_TEST_API        = "test_api"
 
 
 SENSOR = "sensor"
