@@ -7,7 +7,7 @@ I know similar integrations exist, but this one wont need a dependency on node-r
 The Nordpool integration is a good alternative, but has no knowledge of the ecopower prices.
 I also have a prototype integration for Entsoe that could be used.
 
-# Disclaimer:
+## Disclaimer:
  - Errors in this software can have a significant impact on your electricity bill.
  The authors cannot be held liable for any financial or other damage caused by the use of this software. 
  - Ecopower has not been involved in the development of this software and cannot be held responsible for any malfunctions.
@@ -15,7 +15,7 @@ I also have a prototype integration for Entsoe that could be used.
 
 ## Ecopower data source (Ecopower customers only)
 This API provides the actual day-ahead prices that Ecopower will charge for a dynamic contract.
-My current implementation assumes you have a single tarif, no support yet for day/night meter in this integration.
+
 
 # Installation
 
@@ -32,7 +32,12 @@ A config dialog will be displayed.
 
 - Authentication code for the Ecopower API: contact Ecopower to obtain a value for this token. If left empty, you must provide a backup source entity (e.g. from the nordpool integration)
 - API curve id's for consumption and injection (obtained from Ecopower). Just enter the number, not the url
-- (optional) Backup source entity id (used in case ecopower API would be down). Please note that the backup source must be configured so that it provides cost in € per kWh, without VAT. This has only been tested for the nordpool integration that has typically a entity id name like 'sensor.nordpool_kwh_be_eur_3_10_0' 
+- (optional) Backup source flag: tick this box if you want to configure a backup source of information
+- (optional) Test API flag: tick this box if you want to use the Ecopower test API (not for production !)
+
+# Configuration parameters backup source:
+
+ - entity id (used in case ecopower API would be down). Please note that the backup source must be configured so that it provides cost in € per kWh, without VAT. This has only been tested for the nordpool integration that has typically a entity id name like 'sensor.nordpool_kwh_be_eur_3_10_0' 
 - grid operators may charge different prices than the ones published on the backup source. This integration allows you to declare factors A, B, C, D for some customization or the prices published on the backup source:
   - consume cost: Cost = A * (published_price + B)
   - injection fee:  Fee = C * (published_price - D)
