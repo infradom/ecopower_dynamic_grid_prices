@@ -1,14 +1,12 @@
 """Sensor platform for integration_blueprint."""
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.const import ENERGY_KILO_WATT_HOUR, ENERGY_MEGA_WATT_HOUR, CURRENCY_EURO
+from homeassistant.const import ENERGY_KILO_WATT_HOUR, CURRENCY_EURO
 from homeassistant.util import dt
 from dataclasses import dataclass
 from statistics import mean
 from homeassistant.components.sensor import (
     SensorEntityDescription,
-    STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
 )
 from typing import Optional, Dict, Any
 from datetime import datetime, timezone, timedelta

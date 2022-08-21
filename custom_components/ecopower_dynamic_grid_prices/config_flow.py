@@ -7,22 +7,14 @@ from typing import Any
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 #from homeassistant.helpers import device_registry as dr, entity_registry as er
-import json
-import time
-import xmltodict
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
-from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import DOMAIN, NAME, CONF_NAME, CONF_BACKUP
 from .const import CONF_BACKUP_FACTOR_A, CONF_BACKUP_FACTOR_B, CONF_BACKUP_FACTOR_C, ECOPWR_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL_ACC
 from .const import CONF_BACKUP_FACTOR_D, CONF_ECOPWR_TOKEN, CONF_BACKUP_SOURCE, CONF_ECOPWR_API_C, CONF_ECOPWR_API_I, CONF_TEST_API
-from .const import PLATFORMS
 from .__init__ import EcopowerApiClient
 
 _LOGGER = logging.getLogger(__name__)
