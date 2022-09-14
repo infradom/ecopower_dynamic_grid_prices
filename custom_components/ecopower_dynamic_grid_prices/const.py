@@ -22,9 +22,6 @@ DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.0.7"
 ISSUE_URL = "https://github.com/infradom/ecopower_dynamic_grid_prices/issues"
 
-PEAKHOURS = range(8,20)
-OFFPEAKHOURS1 = range(0,8)
-OFFPEAKHOURS2 = range(20,24)
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
@@ -37,12 +34,7 @@ If you have any issues with this you need to open an issue here:
 """
 
 # configuration options
-CONF_BACKUP          = "backup_flag"
-CONF_BACKUP_SOURCE   = "backup_source"
-CONF_BACKUP_FACTOR_A = "backup_factor_A"
-CONF_BACKUP_FACTOR_B = "backup_factor_B"
-CONF_BACKUP_FACTOR_C = "backup_factor_C"
-CONF_BACKUP_FACTOR_D = "backup_factor_D"
+
 CONF_NAME            = "name"
 CONF_ECOPWR_TOKEN    = "ecopower_token"
 CONF_ECOPWR_API_C    = "api_id_cons"
