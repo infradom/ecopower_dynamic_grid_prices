@@ -1,7 +1,6 @@
 """The DynGridPricesSolar integration."""
 from __future__ import annotations
 
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -23,8 +22,6 @@ from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN, CONF_TEST_API
 from .const import ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL_ACC
 from .const import DOMAIN, PLATFORMS, SENSOR
 from .const import CONF_ECOPWR_API_C, CONF_ECOPWR_API_I
-
-# TODO List the platforms that you want to support.
 
 SCAN_INTERVAL = datetime.timedelta(seconds=20)  # TODO
 
@@ -140,6 +137,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         self.cache_i = None
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
+
     async def _async_update_data(self):
         """Update data via library."""
 
@@ -170,18 +168,6 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
             "ecopower_injection_price": self.cache_i[current_hour],
         }
 
-        # insert data in states
-        # attr = {
-        #     "unit_of_measurement": "€/kWh",  # TODO should be able to retreive this from id
-        #     "device_class": "monetary",
-        #     "friendly_name": "Ecopower Consumption Price",
-        # }
-        # await self._insert_states(df_c, "sensor.ecopower_consumption_price", attr)
-        # attr = {'unit_of_measurement': '€/kWh', #TODO should be able to retreive this from id
-        #         'device_class': 'monetary',
-        #         'friendly_name': 'Ecopower Injection Price'}
-        # await self._insert_states(df_i, 'sensor.ecopower_injection_price', attr)
-        # return {"ecopower_consumption_price": df_c, "ecopower_injection_price": df_i}
 
     async def _insert_statistics(self, df, name):
         """Insert historical statistics ."""
@@ -221,6 +207,25 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.info(f"adding {len(statistics)} statistics for {statistic_id}")
         # async_add_external_statistics(self.hass, metadata, statistics)
         async_import_statistics(self.hass, metadata, statistics)
+
+
+
+
+
+
+
+    # insert data in states
+    # attr = {
+    #     "unit_of_measurement": "€/kWh",  # TODO should be able to retreive this from id
+    #     "device_class": "monetary",
+    #     "friendly_name": "Ecopower Consumption Price",
+    # }
+    # await self._insert_states(df_c, "sensor.ecopower_consumption_price", attr)
+    # attr = {'unit_of_measurement': '€/kWh', #TODO should be able to retreive this from id
+    #         'device_class': 'monetary',
+    #         'friendly_name': 'Ecopower Injection Price'}
+    # await self._insert_states(df_i, 'sensor.ecopower_injection_price', attr)
+    # return {"ecopower_consumption_price": df_c, "ecopower_injection_price": df_i}
 
     # async def _insert_states(self, df, entity_id, attr):
     #     """insert states directly, bypassing the normal process
