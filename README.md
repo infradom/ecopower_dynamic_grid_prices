@@ -61,36 +61,21 @@ My very simple initial try uses this yaml code:
 
 ```
 type: custom:apexcharts-card
-experimental:
-  color_threshold: true
 graph_span: 48h
 header:
   title: Electricity Price - Ecopower Injection
   show: true
-span:
-  start: day
-  offset: +0d
 now:
   show: true
   label: Now
 yaxis:
   - decimals: 2
+span:
+  start: day
+  offset: -0d
 series:
-  - entity: sensor.ecopower_injection_price
+  - entity: sensor.ecopower_consumption_price
     type: column
-    float_precision: 3
-    data_generator: |
-      return entity.attributes.raw_today.map((entry) => {
-        return [new Date(entry.start), entry.value];
-      });
-    color_threshold:
-      - value: 0
-        color: green
-        opacity: 1
-      - value: 0.3
-        color: yellow
-      - value: 0.4
-        color: red
 
 
 ```

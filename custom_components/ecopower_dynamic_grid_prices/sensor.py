@@ -8,9 +8,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (DEVICE_CLASS_MONETARY,)
 from .const import NAME, VERSION, ATTRIBUTION
 from .const import DEFAULT_NAME, DOMAIN, ICON, SENSOR
-from .const import CONF_ECOPWR_TOKEN
 import logging
-import pandas
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,9 +23,9 @@ class DynPriceSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        """Return the native value of the sensor."""
-        current_hour=pandas.Timestamp.now(tz="Europe/Brussels").round("H")
-        return self.coordinator.data[self.entity_description.key].loc[current_hour,'value']
+        return self.coordinator.data[self.entity_description.key]
+        # current_hour=pandas.Timestamp.now(tz="Europe/Brussels").floor("H")
+        # return self.coordinator.data[self.entity_description.key].loc[current_hour,'value']
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
