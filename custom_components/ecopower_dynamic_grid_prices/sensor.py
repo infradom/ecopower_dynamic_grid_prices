@@ -1,9 +1,10 @@
 """Sensor platform for integration_blueprint."""
-from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import ENERGY_KILO_WATT_HOUR, CURRENCY_EURO
 from homeassistant.components.sensor import (
     SensorEntityDescription,
+    SensorEntity, 
+    SensorStateClass
 )
 from homeassistant.const import (DEVICE_CLASS_MONETARY,)
 from .const import NAME, VERSION, ATTRIBUTION
@@ -39,6 +40,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         key="ecopower_consumption_price",
         native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
         device_class = DEVICE_CLASS_MONETARY,
+        # as we collect our own statistics, we don't want state_class to be set
+        # state_class = SensorStateClass.MEASUREMENT, 
     )
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)
@@ -48,6 +51,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         key="ecopower_injection_price",
         native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
         device_class = DEVICE_CLASS_MONETARY,
+        # as we collect our own statistics, we don't want state_class to be set
+        # state_class = SensorStateClass.MEASUREMENT,
     )
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)
@@ -59,6 +64,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         key="ecopower_zscore",
         native_unit_of_measurement="",
         device_class = DEVICE_CLASS_MONETARY,
+        # state_class = SensorStateClass.MEASUREMENT,
     )
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)

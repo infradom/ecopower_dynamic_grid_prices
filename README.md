@@ -48,8 +48,6 @@ type: custom:apexcharts-card
 header:
   show: true
   title: Ecopower consumption-injection price
-  show_states: true
-  colorize_states: true
 graph_span: 48h
 span:
   start: day
@@ -57,6 +55,8 @@ span:
 now:
   show: true
   label: Now
+yaxis:
+  - decimals: 2
 series:
   - entity: sensor.ecopower_consumption_price
     type: column
@@ -64,14 +64,18 @@ series:
     statistics:
       type: mean
       period: hour
-      align: middle
+      align: start
+    show:
+      legend_value: false
   - entity: sensor.ecopower_injection_price
     type: column
     float_precision: 2
     statistics:
       type: mean
       period: hour
-      align: middle
+      align: start
+    show:
+      legend_value: false
 
 ```
 

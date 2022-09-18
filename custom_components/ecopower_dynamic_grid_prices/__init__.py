@@ -177,8 +177,8 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
 
     async def _insert_statistics(self, df, name):
         """Insert historical statistics ."""
-        aggs = {f"{ag}_value": ("value", ag) for ag in ["min", "mean", "max"]}
-        df_hour = df.groupby(pandas.Grouper(freq="60Min")).agg(**aggs)
+        # aggs = {f"{ag}_value": ("value", ag) for ag in ["min", "mean", "max"]}
+        # df_hour = df.groupby(pandas.Grouper(freq="60Min")).agg(**aggs)
 
         # statistic_id = f"{DOMAIN}:{name}".lower()  # external statistic
         statistic_id = f"sensor.{name}".lower()
@@ -186,18 +186,16 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.info(f"adding historical statistics for {statistic_id}")
 
         statistics = []
-        for dt, mean, min, max in zip(
-            df_hour.index,
-            df_hour[f"mean_value"],
-            df_hour[f"min_value"],
-            df_hour[f"max_value"],
+        for dt, val in zip(
+            df.index,
+            df['value']
         ):
             statistics.append(
                 StatisticData(
                     start=dt,
-                    mean=mean,
-                    min=min,
-                    max=max,
+                    mean=val,
+                    min=val,
+                    max=val,
                 )
             )
 
