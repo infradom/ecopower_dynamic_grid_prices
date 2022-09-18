@@ -12,10 +12,8 @@ I also have a prototype integration for Entsoe that could be used.
  The authors cannot be held liable for any financial or other damage caused by the use of this software. 
  - Ecopower has not been involved in the development of this software and cannot be held responsible for any malfunctions.
 
-
 ## Ecopower data source (Ecopower customers only)
 This API provides the actual day-ahead prices that Ecopower will charge for a dynamic contract.
-
 
 # Installation
 
@@ -34,9 +32,11 @@ A config dialog will be displayed.
 - API curve id's for consumption and injection (obtained from Ecopower). Just enter the number, not the url
 - (optional) Test API flag: tick this box if you want to use the Ecopower test API (not for production !)
 
-
 # Entities created:
-This integration will create entitites for the Ecopower injection and consumption prices.
+This integration will create 3 entitites:
+- the Ecopower injection price
+- the Ecopower consumption price
+- the price zscore, which indicates if the price for the current hour is low (negative) or high (positive) compared to the other hourly prices (for more info on zscore, see https://en.wikipedia.org/wiki/Standard_score)
 
 # Apexchart Pricing Dashboard Card:
 The integration makes it easy to create an apexchart graph 
@@ -53,23 +53,26 @@ header:
 graph_span: 48h
 span:
   start: day
-  offset: -0h
+  offset: '-0h'
 now:
   show: true
   label: Now
 series:
   - entity: sensor.ecopower_consumption_price
     type: column
-    statistics: 
+    float_precision: 2
+    statistics:
       type: mean
       period: hour
       align: middle
   - entity: sensor.ecopower_injection_price
     type: column
-    statistics: 
+    float_precision: 2
+    statistics:
       type: mean
       period: hour
       align: middle
+
 ```
 
 

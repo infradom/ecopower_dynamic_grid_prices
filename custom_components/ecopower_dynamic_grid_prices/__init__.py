@@ -18,6 +18,7 @@ import aiohttp, asyncio
 import logging
 import datetime
 import pandas
+from scipy import stats
 from .const import STARTUP_MESSAGE, CONF_ECOPWR_TOKEN, CONF_TEST_API
 from .const import ECOPWR_HEADERS, ECOPWR_DAYAHEAD_URL, ECOPWR_DAYAHEAD_URL_ACC
 from .const import DOMAIN, PLATFORMS, SENSOR
@@ -134,7 +135,8 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         self.dt_last_data_point = pandas.Timestamp(year=1990, month=1, day=1, tz="UTC")
         self.dt_last_fetch = pandas.Timestamp(year=1990, month=1, day=1, tz="UTC")
         self.cache_c = None  # caching dict of timestamp to price
-        self.cache_i = None
+        self.cache_i = None # caching dict of timestamp to price
+        self.zscore = None # number of standard deviations from the mean value
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL)
 
 
@@ -162,10 +164,14 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
             self.cache_c = df_c["value"].to_dict()
             self.cache_i = df_i["value"].to_dict()
 
+            # zscore to know if we are in a low price/high price moment
+            self.zscore =  stats.zscore(df_c["value"]).round(decimals=3).to_dict()
+
         current_hour = now.floor("H")
         return {
             "ecopower_consumption_price": self.cache_c[current_hour],
             "ecopower_injection_price": self.cache_i[current_hour],
+            "ecopower_zscore": self.zscore[current_hour],
         }
 
 

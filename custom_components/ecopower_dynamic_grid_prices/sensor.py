@@ -52,6 +52,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)
 
+    # pos value meaning high price relative to the rest of the hours
+    # neg value meaning low price relative to the rest of the hours
+    descr = SensorEntityDescription( 
+        name="Ecopower Price Z-Score",
+        key="ecopower_zscore",
+        native_unit_of_measurement="",
+        device_class = DEVICE_CLASS_MONETARY,
+    )
+    sensor = DynPriceSensor(coordinator, descr)
+    entities.append(sensor)
+
     #_LOGGER.info(f"coordinator data in setup entry: {coordinator.data}")   
     async_add_entities(entities)
 
