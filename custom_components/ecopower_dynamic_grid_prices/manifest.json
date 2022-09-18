@@ -9,7 +9,7 @@
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
-  "dependencies": [],
+  "dependencies": ["recorder"],
   "codeowners": [
     "@infradom"
   ],
