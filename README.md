@@ -61,23 +61,31 @@ My very simple initial try uses this yaml code:
 
 ```
 type: custom:apexcharts-card
-graph_span: 48h
 header:
-  title: Electricity Price - Ecopower Injection
   show: true
+  title: Ecopower consumption-injection price
+  show_states: true
+  colorize_states: true
+graph_span: 48h
+span:
+  start: day
+  offset: -0h
 now:
   show: true
   label: Now
-yaxis:
-  - decimals: 2
-span:
-  start: day
-  offset: -0d
 series:
   - entity: sensor.ecopower_consumption_price
     type: column
-
-
+    statistics: 
+      type: mean
+      period: hour
+      align: middle
+  - entity: sensor.ecopower_injection_price
+    type: column
+    statistics: 
+      type: mean
+      period: hour
+      align: middle
 ```
 
 
