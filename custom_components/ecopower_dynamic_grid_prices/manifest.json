@@ -1,15 +1,15 @@
 {
   "domain": "ecopower_dynamic_grid_prices",
   "name": "EcopowerPrices",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "config_flow": true,
   "documentation": "https://github.com/infradom/ecopower_dynamic_grid_prices",
   "issue_tracker": "https://github.com/infradom/ecopower_dynamic_grid_prices/issues",
-  "requirements": [],
+  "requirements": ["pandas==1.4.3","scipy==1.9.1"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
-  "dependencies": [],
+  "dependencies": ["recorder"],
   "codeowners": [
     "@infradom"
   ],
