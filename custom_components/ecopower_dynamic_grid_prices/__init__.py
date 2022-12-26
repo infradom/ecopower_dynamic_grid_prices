@@ -163,7 +163,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         now = time.time()
         zulutime = time.gmtime(now)
         slot = int(now)//UPDATE_INTERVAL # integer division in python3.x
-        backupentity = self.entry.options.get(CONF_BACKUP_SOURCE)
+        backupentity = self.entry.data.get(CONF_BACKUP_SOURCE)
         if (slot > self.lastcheck) or (not self.ecopwrcache_c and self.ecopowerapi) or (not self.backupcache and backupentity) : # do nothing unless we are in a new time slot, except on startup
             self.lastcheck = slot 
 
