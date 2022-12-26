@@ -59,7 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     for platform in PLATFORMS:
-        if entry.options.get(platform, True):
+        if entry.data.get(platform, True):
             coordinator.platforms.append(platform)
             hass.async_add_job(
                 hass.config_entries.async_forward_entry_setup(entry, platform)
@@ -163,15 +163,14 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
         now = time.time()
         zulutime = time.gmtime(now)
         slot = int(now)//UPDATE_INTERVAL # integer division in python3.x
-        backupentity = self.entry.data.get(CONF_BACKUP_SOURCE)
+        backupentity = self.entry.options.get(CONF_BACKUP_SOURCE)
         if (slot > self.lastcheck) or (not self.ecopwrcache_c and self.ecopowerapi) or (not self.backupcache and backupentity) : # do nothing unless we are in a new time slot, except on startup
             self.lastcheck = slot 
-
 
             if self.ecopowerapi:
                 _LOGGER.info(f"checking if ecopower api update is needed : {zulutime} not_cache_c: {not self.ecopwrcache_c} not_backupcache: {not self.backupcache} ")
                 # reduce number of cloud fetches
-                if (self.ecopwrcache_c == None) or (self.ecopwrcache_i == None) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.ecopwrlastday <= zulutime.tm_mday)):
+                if (self.ecopwrcache_c == None) or (self.ecopwrcache_i == None) or ((now - self.lastecopwrfetch >= 3600) and (zulutime.tm_hour >= 11) and (self.ecopwrlastday <= zulutime.tm_mday)):
                     try:
                         #if True:
                         res2 = await self.ecopowerapi.async_get_data(url = self.client._url_c )
@@ -199,7 +198,7 @@ class DynPriceUpdateCoordinator(DataUpdateCoordinator):
 
 
             if backupentity:
-                if (not self.backupcache) or ((now - self.lastbackupfetch >= 3600) and (zulutime.tm_hour >= 12) and (self.backuplastday <= zulutime.tm_mday)):
+                if (not self.backupcache) or ((now - self.lastbackupfetch >= 3600) and (zulutime.tm_hour >= 11) and (self.backuplastday <= zulutime.tm_mday)):
 
                     factor_a = self.entry.data.get(CONF_BACKUP_FACTOR_A)
                     factor_b = self.entry.data.get(CONF_BACKUP_FACTOR_B)

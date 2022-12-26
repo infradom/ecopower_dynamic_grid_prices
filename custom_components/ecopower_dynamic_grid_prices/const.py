@@ -19,7 +19,7 @@ ATTRIBUTION = '@infradom'
 NAME = "EcopowerPrices"
 DEFAULT_NAME = DOMAIN
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.7"
+VERSION = "0.0.9"
 ISSUE_URL = "https://github.com/infradom/ecopower_dynamic_grid_prices/issues"
 
 PEAKHOURS = range(8,20)
