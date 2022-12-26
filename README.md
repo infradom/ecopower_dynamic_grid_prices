@@ -2,6 +2,8 @@
 
 --------
 
+## ATTENTION !!! : this integration is only meant for a very limited group of ecopower customers that take part in the dynamic prices trial (juli 1 - 31 december). It is about hourly changing prices 2022 (day-ahead-prices). Normal Ecopower customers should not use this integration !!
+
 This integration will periodically pull the dynamic grid prices from the Belgian Ecopower API.
 I know similar integrations exist, but this one wont need a dependency on node-red. 
 The Nordpool integration is a good alternative, but has no knowledge of the ecopower prices.
