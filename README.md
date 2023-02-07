@@ -48,10 +48,10 @@ type: custom:apexcharts-card
 header:
   show: true
   title: Ecopower consumption-injection price
-graph_span: 48h
+graph_span: 36h
 span:
-  start: day
-  offset: '-0h'
+  start: hour
+  offset: '-12h'
 now:
   show: true
   label: Now
@@ -76,6 +76,7 @@ series:
       align: start
     show:
       legend_value: false
+
 
 ```
 

@@ -41,7 +41,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
         device_class = DEVICE_CLASS_MONETARY,
         # as we collect our own statistics, we don't want state_class to be set
-        # state_class = SensorStateClass.MEASUREMENT, 
+        state_class = None, #SensorStateClass.MEASUREMENT, 
     )
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)
@@ -52,7 +52,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         native_unit_of_measurement=f"{CURRENCY_EURO}/{ENERGY_KILO_WATT_HOUR}",
         device_class = DEVICE_CLASS_MONETARY,
         # as we collect our own statistics, we don't want state_class to be set
-        # state_class = SensorStateClass.MEASUREMENT,
+        state_class = None, #SensorStateClass.MEASUREMENT,
     )
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)
@@ -64,7 +64,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         key="ecopower_zscore",
         native_unit_of_measurement="",
         device_class = DEVICE_CLASS_MONETARY,
-        # state_class = SensorStateClass.MEASUREMENT,
+        state_class = None, #SensorStateClass.MEASUREMENT,
     )
     sensor = DynPriceSensor(coordinator, descr)
     entities.append(sensor)
