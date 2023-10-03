@@ -2,7 +2,7 @@
 
 --------
 
-## ATTENTION !!! : this integration is only meant for a very limited group of ecopower customers that take part in the dynamic prices trial (juli 1 - 31 december). It is about hourly changing prices 2022 (day-ahead-prices). Normal Ecopower customers should not use this integration !!
+## ATTENTION !!! : This integration is only meant for a limited group of ecopower customers that have a dynamic prices contract with hourly changing prices (day-ahead-prices). Normal Ecopower customers should not use this integration !!
 
 ## ATTENTION: As Ecopower may drop support for its API in the future, I suggest you may use my other https://github.com/infradom/dynamic_grid_prices integration that can compute the ecopower prices from the Entsoe prices
 
